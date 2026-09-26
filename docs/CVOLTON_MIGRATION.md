@@ -28,37 +28,46 @@ Credential handling is conservative:
 
 Source account IDs and level IDs are kept in persistent mapping tables so repeated imports remain deterministic.
 
-## Dry-run
+## Recommended operator workflow
 
-Run the migration status first:
+Use the **MuchoCore Migration Kit** instead of invoking the low-level importer directly:
 
-    cd /opt/mucho-core
-    php bin/migrate.php migrate
+    sudo ./tools/migration/mucho-migrate.sh       --source-host=SOURCE_DB_HOST       --source-db=SOURCE_DB_NAME       --source-user=SOURCE_DB_USER
 
-Then inspect the source:
-
-    php bin/import-cvolton-db.php       --source-host=127.0.0.1       --source-db=geometrydash       --source-user=root
-
-Dry-run is the default and never changes the destination.
+The default run is a read-only preflight. It checks the running MuchoCore target, verifies the migration mapping tables and reports source row counts.
 
 ## Apply
 
-Back up the destination database first. Then:
+After reviewing the preflight output, run:
 
-    php bin/import-cvolton-db.php       --source-host=127.0.0.1       --source-db=geometrydash       --source-user=root       --apply       --confirm=COVOLTON
+    sudo ./tools/migration/mucho-migrate.sh       --source-host=SOURCE_DB_HOST       --source-db=SOURCE_DB_NAME       --source-user=SOURCE_DB_USER       --apply --confirm=COVOLTON
 
-Avoid putting passwords into shell history. Use CVOLTON_SOURCE_PASS instead:
+The kit creates a verified target database backup before importing. The source is opened read-only, the destination import runs inside one transaction, and a post-migration healthcheck is performed.
+
+## Passwords
+
+Avoid putting the source password in shell history:
 
     export CVOLTON_SOURCE_PASS='your-source-db-password'
+    sudo -E ./tools/migration/mucho-migrate.sh       --source-host=SOURCE_DB_HOST       --source-db=SOURCE_DB_NAME       --source-user=SOURCE_DB_USER
 
-The target-side import runs inside one transaction and rolls back on failure.
+Or let the kit prompt for the password without echoing it.
+
+Unset the environment variable after use:
+
+    unset CVOLTON_SOURCE_PASS
 
 ## Verification
 
-    php bin/migrate.php status
-    curl -fsS https://your-domain.example/health
+Migration reports are stored under:
+
+    /opt/mucho-core/backups/migrations/
+
+Keep the verified backup and report until the production cutover is validated.
 
 Then test representative migrated accounts, levels and scores in the matching Geometry Dash client.
+
+See **[MIGRATION_KIT.md](MIGRATION_KIT.md)** for the full operator workflow and current migration scope.
 
 ## Current limitations
 
