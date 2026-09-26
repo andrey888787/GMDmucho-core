@@ -22,7 +22,7 @@ if (!preg_match("/^ARG PHP_VERSION=8\\.5$/m", $dockerfile)) {
     throw new RuntimeException("Docker runtime must default to PHP 8.5.");
 }
 
-if (strpos($dockerfile, "FROM php:${PHP_VERSION}-fpm-bookworm") === false) {
+if (strpos($dockerfile, 'FROM php:${PHP_VERSION}-fpm-bookworm') === false) {
     throw new RuntimeException("Docker runtime must use the configurable PHP_VERSION argument.");
 }
 
