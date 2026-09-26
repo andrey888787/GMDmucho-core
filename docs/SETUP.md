@@ -21,13 +21,23 @@ gdps.example.com → YOUR-VPS-IP
 
 Replace the example domain with your own.
 
-## 2. Run the installer
+## 2. One-command installation
 
-From the repository root:
+You can run the installer directly from a Windows PowerShell SSH session or from the VPS shell. You do not need to clone the repository first.
+
+From the VPS:
 
 ~~~bash
-sudo ./install
+curl -fsSL https://raw.githubusercontent.com/IZKGMD/GMDmucho-core/main/install.sh | sudo bash
 ~~~
+
+From Windows PowerShell:
+
+~~~powershell
+ssh -t root@YOUR-VPS-IP "curl -fsSL https://raw.githubusercontent.com/IZKGMD/GMDmucho-core/main/install.sh | bash"
+~~~
+
+The installer opens an interactive setup wizard. Configure the domain, database name/user, Geometry Dash compatibility, YouTube import, music moderation and automatic updates, then continue. PHP, MariaDB, Caddy and Docker are installed/configured automatically.
 
 The installer opens a version-selection menu:
 
@@ -51,13 +61,23 @@ sudo -E bash install.sh
 
 The installer prepares:
 
+- Docker and Docker Compose;
 - MariaDB;
 - PHP 8.3;
-- Caddy;
+- Caddy with HTTPS;
 - the MuchoCore database;
 - cloud save keys;
 - the administrator account;
-- the selected Geometry Dash compatibility profile.
+- the selected Geometry Dash compatibility profile;
+- the interactive MuchoCore Control Center.
+
+After installation, run:
+
+~~~bash
+sudo mucho
+~~~
+
+The Control Center provides an interactive terminal menu for server status, configuration, updates, backups, logs and diagnostics. Configuration changes are written through the deployment layer instead of requiring manual environment-file editing.
 
 ## 3. Verify the server
 
@@ -99,6 +119,14 @@ Use:
 sudo /opt/mucho-core/update.sh
 ~~~
 
+Or use:
+
+~~~bash
+sudo mucho
+~~~
+
+and choose **Update MuchoCore**.
+
 Updates preserve the selected compatibility profile and Cloudflare Tunnel deployment mode.
 
 ### Release-based automatic updates
@@ -126,6 +154,18 @@ For live logs:
 sudo docker compose logs -f
 ~~~
 
+## Configuration and credentials
+
+Use the Control Center instead of editing configuration files by hand:
+
+~~~bash
+sudo mucho
+~~~
+
+From its configuration menu you can change the GDPS domain, database password, administrator password, GD compatibility profile, YouTube import, music moderation and automatic updates.
+
+Database password rotation updates the MariaDB account and the Docker secret together, then recreates the application container. The password is never written into the environment file.
+
 ## Backups
 
 Before major changes, create a database backup:
@@ -133,6 +173,8 @@ Before major changes, create a database backup:
 ~~~bash
 sudo /opt/mucho-core/bin/mucho-db-backup.sh
 ~~~
+
+The backup utility is portable across MuchoCore installation locations and performs the dump inside the MariaDB container.
 
 Keep the Cloud Save secret safe:
 

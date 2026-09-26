@@ -49,7 +49,7 @@
 | 🔄 **Cvolton migration** | Read-only source DB preflight, account/profile/level/score migration, persistent ID mapping and transactional apply |
 | 🏰 **Clans** | Player-dashboard clan directory, owner/officer/member permissions, membership, invitations, applications, bans, live aggregated statistics, clan rankings, deletion and server-side in-game clan-tag display |
 | 🧰 **Client patchers** | Windows desktop patcher, browser-based Windows patcher and Android APK patcher |
-| 🐳 **Deployment** | Docker Compose, MariaDB, PHP 8.3, Caddy, automatic migrations, one-command manual updates and release detection |
+| 🐳 **Deployment** | Docker Compose, MariaDB, PHP 8.3, Caddy, automatic migrations, one-command installation, interactive Control Center, backups and release detection |
 | 🧪 **Validation** | PHP, shell, protocol, wire-format, security, patcher, Docker and Caddy checks in GitHub Actions |
 | 🏗️ **Architecture** | Thin application bootstrap, isolated request pipeline, centralized dependency/route wiring and explicit compatibility modules |
 
@@ -86,6 +86,42 @@ https://YOUR-DOMAIN/admin/
 ```
 
 For the full VPS workflow, see **[docs/SETUP.md](docs/SETUP.md)**.
+
+
+
+### 🧭 VPS Control Center
+
+After installation, MuchoCore provides an interactive terminal control center:
+
+~~~bash
+sudo mucho
+~~~
+
+It works over SSH from Windows PowerShell or directly from a Linux shell. The menu covers server status, configuration, updates, backups, logs and diagnostics.
+
+Configuration changes include:
+
+- GDPS domain;
+- database password rotation;
+- administrator password;
+- Geometry Dash compatibility profile;
+- YouTube import;
+- music moderation;
+- automatic updates.
+
+Database password rotation updates the live MariaDB account and the Docker secret together. Passwords are not stored in the public environment file.
+
+The installer itself can also be launched without cloning the repository first:
+
+~~~bash
+curl -fsSL https://raw.githubusercontent.com/IZKGMD/GMDmucho-core/main/install.sh | sudo bash
+~~~
+
+From Windows PowerShell:
+
+~~~powershell
+ssh -t root@YOUR-VPS-IP "curl -fsSL https://raw.githubusercontent.com/IZKGMD/GMDmucho-core/main/install.sh | bash"
+~~~
 
 ### Custom plugins
 

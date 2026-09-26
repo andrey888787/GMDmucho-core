@@ -46,6 +46,18 @@ MuchoCore v1.0.4 focuses on simplifying the core runtime while expanding the bui
 
 ## Unreleased
 
+### VPS Control Center
+
+- added an interactive terminal Control Center available as `sudo mucho`;
+- added a one-command VPS deployment path that works from a Windows PowerShell SSH session or directly on the VPS;
+- added interactive installation settings for domain, database name/user, Geometry Dash compatibility, YouTube import, music moderation and automatic updates;
+- added configuration controls for domain, database password, administrator password, compatibility profile and feature toggles without manual configuration-file editing;
+- added a `mucho doctor` diagnostic flow covering Docker, Compose, secrets, liveness and migrations;
+- made database password rotation update the MariaDB account and Docker secret together before recreating the application container;
+- made database backups portable across installation paths and run the dump inside the MariaDB container;
+- added regression coverage for the Control Center and deployment tooling.
+
+
 ### Clan System v2
 
 - expanded the existing clan system with owner-only settings, ownership transfer and disbanding;

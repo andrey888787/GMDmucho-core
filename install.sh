@@ -12,6 +12,8 @@ CUSTOM_CONTENT_URL="${MUCHO_CUSTOM_CONTENT_URL:-}"
 TURNSTILE_SITEKEY="${MUCHO_TURNSTILE_SITEKEY:-}"
 TURNSTILE_SECRET="${MUCHO_TURNSTILE_SECRET:-}"
 MUCHO_ADMIN_PASSWORD="${MUCHO_ADMIN_PASSWORD:-}"
+MUCHO_ENABLE_YOUTUBE_IMPORT="${MUCHO_ENABLE_YOUTUBE_IMPORT:-1}"
+MUCHO_MUSIC_MODERATION_REQUIRED="${MUCHO_MUSIC_MODERATION_REQUIRED:-1}"
 # Optional: set MUCHO_TUNNEL_TOKEN to deploy via Cloudflare Tunnel instead of
 # binding 80/443 directly. Use this on NAT/CGNAT VPS plans that have no
 # dedicated public IPv4 (inbound ports other than SSH are not reachable).
@@ -249,8 +251,49 @@ DB_NAME="${DB_NAME:-muchocore}"
 DB_USER="${DB_USER:-muchocore_user}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 CUSTOM_CONTENT_URL="${CUSTOM_CONTENT_URL:-https://geometrydashfiles.b-cdn.net}"
+# Defaults: MUCHO_AUTO_UPDATE=1 and MUCHO_AUTO_UPDATE_INTERVAL=15min
+MUCHO_AUTO_UPDATE="${MUCHO_AUTO_UPDATE:-1}"
+MUCHO_AUTO_UPDATE_INTERVAL="${MUCHO_AUTO_UPDATE_INTERVAL:-15min}"
 
-select_compatibility_profile
+setup_wizard() {
+  [[ -t 0 && -t 1 ]] || return
+
+  while true; do
+    print_banner
+    printf "${BOLD}  MuchoCore setup wizard${RESET}\\n"
+    printf "  Everything can be changed later with: sudo mucho\\n\\n"
+    printf "  1) Domain             %s\\n" "${DOMAIN:-<not set>}"
+    printf "  2) Database name      %s\\n" "$DB_NAME"
+    printf "  3) Database user      %s\\n" "$DB_USER"
+    printf "  4) GD compatibility   %s\\n" "$(profile_label "$GD_VERSIONS")"
+    printf "  5) YouTube import     %s\\n" "$([ "$MUCHO_ENABLE_YOUTUBE_IMPORT" = 1 ] && echo enabled || echo disabled)"
+    printf "  6) Music moderation   %s\\n" "$([ "$MUCHO_MUSIC_MODERATION_REQUIRED" = 1 ] && echo required || echo disabled)"
+    printf "  7) Automatic updates  %s\\n" "$([ "$MUCHO_AUTO_UPDATE" = 1 ] && echo enabled || echo disabled)"
+    printf "  8) Continue\\n\\n"
+
+    local choice
+    read -r -p "  Select [8]: " choice < /dev/tty || choice=8
+    choice="${choice:-8}"
+
+    case "$choice" in
+      1) read -r -p "  GDPS domain: " DOMAIN < /dev/tty ;;
+      2) read -r -p "  Database name: " DB_NAME < /dev/tty ;;
+      3) read -r -p "  Database user: " DB_USER < /dev/tty ;;
+      4) select_compatibility_profile ;;
+      5) if [[ "$MUCHO_ENABLE_YOUTUBE_IMPORT" == 1 ]]; then MUCHO_ENABLE_YOUTUBE_IMPORT=0; else MUCHO_ENABLE_YOUTUBE_IMPORT=1; fi ;;
+      6) if [[ "$MUCHO_MUSIC_MODERATION_REQUIRED" == 1 ]]; then MUCHO_MUSIC_MODERATION_REQUIRED=0; else MUCHO_MUSIC_MODERATION_REQUIRED=1; fi ;;
+      7) if [[ "$MUCHO_AUTO_UPDATE" == 1 ]]; then MUCHO_AUTO_UPDATE=0; else MUCHO_AUTO_UPDATE=1; fi ;;
+      8)
+        [[ -n "${DOMAIN:-}" ]] || { warn "Set a domain first."; continue; }
+        return
+        ;;
+      *) warn "Invalid selection." ;;
+    esac
+    printf "\\n"
+  done
+}
+
+setup_wizard
 
 if [[ -z "$DOMAIN" ]]; then
   read -r -p "  GDPS domain (for example gdps.example.com): " DOMAIN < /dev/tty
@@ -388,13 +431,29 @@ MUCHO_BACKUP_DIR=/var/lib/muchocore-backups
 TZ=UTC
 MUCHO_GD_VERSIONS=$GD_VERSIONS
 CADDY_EXTRA_HOSTS=$CADDY_EXTRA_HOSTS
-MUCHO_AUTO_UPDATE=1
-MUCHO_AUTO_UPDATE_INTERVAL=15min
+MUCHO_AUTO_UPDATE=$MUCHO_AUTO_UPDATE
+MUCHO_AUTO_UPDATE_INTERVAL=$MUCHO_AUTO_UPDATE_INTERVAL
+MUCHO_ENABLE_YOUTUBE_IMPORT=$MUCHO_ENABLE_YOUTUBE_IMPORT
+MUCHO_MUSIC_MODERATION_REQUIRED=$MUCHO_MUSIC_MODERATION_REQUIRED
 EOFENV
 if [[ -n "$TUNNEL_TOKEN" ]]; then
   printf 'MUCHO_TUNNEL_TOKEN=%s\n' "$TUNNEL_TOKEN" >> "$INSTALL_DIR/.env"
 fi
+install -d -m 770 "$INSTALL_DIR/storage/control"
+if [[ "$MUCHO_MUSIC_MODERATION_REQUIRED" == "1" ]]; then
+  : > "$INSTALL_DIR/storage/control/music-moderation-required.flag"
+else
+  rm -f "$INSTALL_DIR/storage/control/music-moderation-required.flag"
+fi
 chmod 600 "$INSTALL_DIR/.env"
+
+if [[ -f "$INSTALL_DIR/bin/mucho" ]]; then
+  install -m 755 "$INSTALL_DIR/bin/mucho" /usr/local/bin/mucho
+  log "Control Center installed: sudo mucho"
+fi
+if [[ -f "$INSTALL_DIR/bin/muchodb-password" ]]; then
+  install -m 755 "$INSTALL_DIR/bin/muchodb-password" /usr/local/bin/muchodb-password
+fi
 
 if [[ -f "$INSTALL_DIR/bin/mucho-install-auto-update.sh" ]]; then
   log "Configuring release-based automatic updates..."
@@ -484,5 +543,8 @@ Update:
 
 Logs:
   cd $INSTALL_DIR && sudo docker compose logs -f
+
+Management:
+  sudo mucho
 
 EOFOUT

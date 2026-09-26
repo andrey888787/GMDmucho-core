@@ -43,6 +43,7 @@ services:
       MUCHO_CLIENT_TRACE: ${MUCHO_CLIENT_TRACE:-0}
       MUCHO_CLIENT_TRACE_FILE: ${MUCHO_CLIENT_TRACE_FILE:-/var/www/mucho-core/storage/client-trace.ndjson}
       MUCHO_GD_VERSIONS: ${MUCHO_GD_VERSIONS:-all}
+      MUCHO_ENABLE_YOUTUBE_IMPORT: ${MUCHO_ENABLE_YOUTUBE_IMPORT:-1}
     secrets:
       - db_password
       - admin_password

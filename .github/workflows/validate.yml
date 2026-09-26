@@ -23,6 +23,9 @@ jobs:
           bash tests/release/release-deployment-tools.sh
           bash -n install
           bash -n update.sh
+          bash -n bin/mucho
+          bash -n bin/muchodb-password
+          bash -n bin/mucho-db-backup.sh
           bash -n docker/app-entrypoint.sh
           ! grep -nE '\\\$[0-9]+' install.sh
           bash -n uninstall.sh
@@ -76,6 +79,7 @@ jobs:
           php tests/application/legacy-19-session.php
           php tests/application/security-regressions.php
           bash tests/release/release-update-detection.sh
+          bash tests/release/vps-control-center.sh
           php tests/database/migrator-concurrency.php
           php tests/application/music-upload-contract.php
           php tests/application/clan-contract.php
@@ -109,6 +113,9 @@ jobs:
           test -f tools/client/client-patcher.ps1
           test -f auto-update.sh
           test -f bin/mucho-install-auto-update.sh
+          test -f bin/mucho
+          test -f bin/muchodb-password
+          test -f tests/release/vps-control-center.sh
           test -f docs/AUTO_UPDATE.md
           test -f docs/ADMIN_RBAC.md
           test -f database/migrations/20260926_001_plugin_admin.php

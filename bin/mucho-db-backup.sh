@@ -1,252 +1,43 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-ROOT="/var/www/mucho-core"
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+SECRETS="$ROOT/.secrets"
+ENV_FILE="$ROOT/.env"
 BACKUP_DIR="$ROOT/backups/database"
 LOG_DIR="$ROOT/logs"
 LOG="$LOG_DIR/db-backup.log"
 LOCK="/run/mucho-db-backup.lock"
+RETENTION_MINUTES=20160
 
-RETENTION_MINUTES=20160   # 14 days
-
+cd "$ROOT"
 mkdir -p "$BACKUP_DIR" "$LOG_DIR"
 
-# Prevent concurrent backup jobs.
 exec 9>"$LOCK"
-
 if ! flock -n 9; then
     echo "[$(date -Is)] Backup already running, skip." >> "$LOG"
     exit 0
 fi
 
+[[ -s "$SECRETS/db_root_password" ]] || {
+    echo "[$(date -Is)] ERROR: db_root_password secret is missing" >> "$LOG"
+    exit 1
+}
 
-# ------------------------------------------------------------
-# Check for a database dump utility.
-# ------------------------------------------------------------
+DB_NAME="$(sed -n 's/^DB_NAME=//p' "$ENV_FILE" | head -n1)"
+SAFE_DB="$(printf '%s' "$DB_NAME" | tr -cd 'A-Za-z0-9_.-')"
+[[ -n "$SAFE_DB" ]] || SAFE_DB="muchocore"
 
-if command -v mariadb-dump >/dev/null 2>&1; then
-    DUMP_BIN="$(command -v mariadb-dump)"
-elif command -v mysqldump >/dev/null 2>&1; then
-    DUMP_BIN="$(command -v mysqldump)"
+compose_args=()
+if [[ -n "$(sed -n 's/^MUCHO_TUNNEL_TOKEN=//p' "$ENV_FILE" | head -n1)" ]]; then
+    compose_args=(-f docker-compose.yml -f docker-compose.tunnel.yml)
 else
-    echo "[$(date -Is)] ERROR: mysqldump/mariadb-dump not found" >> "$LOG"
-    exit 1
+    compose_args=()
 fi
-
-
-# ------------------------------------------------------------
-# Read database credentials from the MuchoCore .env file.
-# ------------------------------------------------------------
-
-TMP_CNF="$(mktemp)"
-chmod 600 "$TMP_CNF"
-
-cleanup() {
-    rm -f "$TMP_CNF"
-}
-
-trap cleanup EXIT
-
-
-DB_NAME="$(
-php /dev/stdin "$TMP_CNF" <<'PHP'
-<?php
-
-$root = '/var/www/mucho-core';
-$cnf  = $argv[1];
-
-$envFile = $root . '/.env';
-
-if (!is_file($envFile)) {
-    fwrite(STDERR, "ERROR: .env not found\n");
-    exit(1);
-}
-
-$lines = file(
-    $envFile,
-    FILE_IGNORE_NEW_LINES |
-    FILE_SKIP_EMPTY_LINES
-);
-
-$env = [];
-
-foreach ($lines as $line) {
-
-    $line = trim($line);
-
-    if (
-        $line === '' ||
-        str_starts_with($line, '#')
-    ) {
-        continue;
-    }
-
-    if (str_starts_with($line, 'export ')) {
-        $line = substr($line, 7);
-    }
-
-    $pos = strpos($line, '=');
-
-    if ($pos === false) {
-        continue;
-    }
-
-    $key = trim(substr($line, 0, $pos));
-    $value = trim(substr($line, $pos + 1));
-
-    if (
-        strlen($value) >= 2 &&
-        (
-            ($value[0] === '"' && $value[-1] === '"') ||
-            ($value[0] === "'" && $value[-1] === "'")
-        )
-    ) {
-        $value = substr($value, 1, -1);
-    }
-
-    $env[$key] = $value;
-}
-
-
-$host = '127.0.0.1';
-$port = '3306';
-$user = '';
-$pass = '';
-$db   = '';
-
-
-if (!empty($env['DATABASE_URL'])) {
-
-    $url = parse_url($env['DATABASE_URL']);
-
-    if ($url === false) {
-        fwrite(STDERR, "ERROR: Invalid DATABASE_URL\n");
-        exit(1);
-    }
-
-    $host = $url['host'] ?? $host;
-    $port = (string)($url['port'] ?? $port);
-
-    $user = isset($url['user'])
-        ? urldecode($url['user'])
-        : '';
-
-    $pass = isset($url['pass'])
-        ? urldecode($url['pass'])
-        : '';
-
-    $db = isset($url['path'])
-        ? ltrim(
-            urldecode($url['path']),
-            '/'
-        )
-        : '';
-
-} else {
-
-    $host =
-        $env['DB_HOST']
-        ?? $host;
-
-    $port =
-        $env['DB_PORT']
-        ?? $port;
-
-    $user =
-        $env['DB_USER']
-        ?? $env['DB_USERNAME']
-        ?? '';
-
-    $pass =
-        $env['DB_PASS']
-        ?? $env['DB_PASSWORD']
-        ?? '';
-
-    $db =
-        $env['DB_NAME']
-        ?? $env['DB_DATABASE']
-        ?? '';
-}
-
-
-if ($user === '' || $db === '') {
-    fwrite(
-        STDERR,
-        "ERROR: Database credentials incomplete\n"
-    );
-    exit(1);
-}
-
-
-function cnfQuote(string $value): string
-{
-    return '"' .
-        str_replace(
-            ['\\', '"'],
-            ['\\\\', '\\"'],
-            $value
-        ) .
-        '"';
-}
-
-
-$config =
-    "[client]\n" .
-    "host="     . cnfQuote($host) . "\n" .
-    "port="     . cnfQuote($port) . "\n" .
-    "user="     . cnfQuote($user) . "\n" .
-    "password=" . cnfQuote($pass) . "\n";
-
-
-if (
-    file_put_contents(
-        $cnf,
-        $config
-    ) === false
-) {
-    fwrite(
-        STDERR,
-        "ERROR: Cannot create temporary DB config\n"
-    );
-    exit(1);
-}
-
-chmod($cnf, 0600);
-
-echo $db;
-PHP
-)"
-
-
-if [ -z "$DB_NAME" ]; then
-    echo "[$(date -Is)] ERROR: Empty DB name" >> "$LOG"
-    exit 1
-fi
-
-
-SAFE_DB="$(
-    printf '%s' "$DB_NAME" |
-    tr -cd 'A-Za-z0-9_.-'
-)"
-
-if [ -z "$SAFE_DB" ]; then
-    SAFE_DB="muchocore"
-fi
-
-
-# ------------------------------------------------------------
-# Build backup filenames.
-# ------------------------------------------------------------
 
 STAMP="$(date -u +%Y%m%d_%H%M%S)"
-
 FINAL="$BACKUP_DIR/${SAFE_DB}_${STAMP}.sql.gz"
 TMP="$FINAL.tmp"
-
-
-# ------------------------------------------------------------
-# Backup
-# ------------------------------------------------------------
 
 {
     echo
@@ -255,101 +46,59 @@ TMP="$FINAL.tmp"
     echo "DATABASE=$DB_NAME"
     echo "FILE=$FINAL"
     echo "========================================"
-
 } >> "$LOG"
 
+set +e
+docker compose "${compose_args[@]}" exec -T db sh -c '
+    set -eu
+    exec mariadb-dump \
+      -h 127.0.0.1 \
+      -u root \
+      -p"$(cat /run/secrets/db_root_password)" \
+      --single-transaction \
+      --quick \
+      --triggers \
+      --hex-blob \
+      --default-character-set=utf8mb4 \
+      "$1"
+' sh "$DB_NAME" | gzip -9 > "$TMP"
+dump_status=${PIPESTATUS[0]}
+set -e
 
-if ! "$DUMP_BIN" \
-    --defaults-extra-file="$TMP_CNF" \
-    --single-transaction \
-    --quick \
-    --triggers \
-    --hex-blob \
-    --default-character-set=utf8mb4 \
-    "$DB_NAME" \
-    | gzip -9 > "$TMP"
-then
+if [[ "$dump_status" -ne 0 ]]; then
     rm -f "$TMP"
-
     echo "[$(date -Is)] ERROR: database dump failed" >> "$LOG"
     exit 1
 fi
 
-
-# ------------------------------------------------------------
-# Verify gzip integrity.
-# ------------------------------------------------------------
-
-if ! gzip -t "$TMP"; then
+gzip -t "$TMP" || {
     rm -f "$TMP"
-
     echo "[$(date -Is)] ERROR: gzip verification failed" >> "$LOG"
     exit 1
-fi
-
-
-# ------------------------------------------------------------
-# Reject suspiciously small backups.
-# ------------------------------------------------------------
+}
 
 SIZE="$(stat -c '%s' "$TMP")"
-
-if [ "$SIZE" -lt 100 ]; then
+if [[ "$SIZE" -lt 100 ]]; then
     rm -f "$TMP"
-
     echo "[$(date -Is)] ERROR: backup suspiciously small" >> "$LOG"
     exit 1
 fi
 
-
-# ------------------------------------------------------------
-# Publish the verified backup.
-# ------------------------------------------------------------
-
 mv "$TMP" "$FINAL"
-
-chown root:www-data "$FINAL"
 chmod 640 "$FINAL"
-
-
-# SHA-256
 sha256sum "$FINAL" > "$FINAL.sha256"
-
-chown root:www-data "$FINAL.sha256"
 chmod 640 "$FINAL.sha256"
-
-
-# ------------------------------------------------------------
-# Remove backups older than 14 days.
-# ------------------------------------------------------------
 
 DELETED="$(
     find "$BACKUP_DIR" \
-        -type f \
-        -mmin +"$RETENTION_MINUTES" \
-        \( \
-            -name '*.sql.gz' \
-            -o \
-            -name '*.sql.gz.sha256' \
-        \) \
-        -print \
-        -delete \
-        | wc -l
+      -type f \
+      -mmin +"$RETENTION_MINUTES" \
+      \( -name '*.sql.gz' -o -name '*.sql.gz.sha256' \) \
+      -print -delete | wc -l
 )"
 
-
-# ------------------------------------------------------------
-# Write final backup status.
-# ------------------------------------------------------------
-
-HUMAN_SIZE="$(
-    du -h "$FINAL" |
-    awk '{print $1}'
-)"
-
-HASH="$(
-    awk '{print $1}' "$FINAL.sha256"
-)"
+HUMAN_SIZE="$(du -h "$FINAL" | awk '{print $1}')"
+HASH="$(awk '{print $1}' "$FINAL.sha256")"
 
 {
     echo "BACKUP_OK"
@@ -358,9 +107,7 @@ HASH="$(
     echo "OLD_FILES_DELETED=$DELETED"
     echo "FINISH $(date -Is)"
     echo "========================================"
-
 } >> "$LOG"
-
 
 echo "BACKUP_OK"
 echo "FILE=$FINAL"
