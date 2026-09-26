@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MuchoCore\\Migration;
+namespace MuchoCore\Migration;
 
 use PDO;
 
