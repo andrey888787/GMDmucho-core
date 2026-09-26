@@ -35,6 +35,7 @@
         path /muchocore/*
     }
     handle @muchocore_page {
+        uri strip_prefix /muchocore
         root * /var/www/mucho-core/public/muchocore
         file_server
     }
