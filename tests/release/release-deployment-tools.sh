@@ -15,7 +15,7 @@ if grep -Fq 'docker compose "\${COMPOSE_ARGS[@]}"' update.sh; then
 fi
 
 grep -Fq 'docker compose "${COMPOSE_ARGS[@]}"' update.sh
-grep -Fq 'CADDY_EXTRA_HOSTS="${MUCHO_CADDY_EXTRA_HOSTS:-testgdps.muchogdps.space}"' install.sh
+grep -Fq 'CADDY_EXTRA_HOSTS="${MUCHO_CADDY_EXTRA_HOSTS:-}"' install.sh
 grep -Fq 'CADDY_EXTRA_HOSTS=$CADDY_EXTRA_HOSTS' install.sh
 grep -Fq 'GD 1.1 only' install.sh
 grep -Fq 'GD_VERSIONS="11"' install.sh
