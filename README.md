@@ -23,6 +23,8 @@
 </p>
 
 <p align="center">
+  <a href="docs/GETTING_STARTED.md">⚡ Getting Started</a> ·
+  <a href="docs/MIGRATION_KIT.md">🔄 Migration Kit</a> ·
   <a href="docs/SETUP.md">🚀 Setup</a> ·
   <a href="docs/CLIENT_SETUP.md">🎮 Client Setup</a> ·
   <a href="docs/CLANS.md">🏰 Clans</a> ·
@@ -58,6 +60,10 @@
 ---
 
 ## 🚀 Quick start
+
+New to MuchoCore? Start with **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the shortest install path.
+
+Already running a Cvolton/GMDprivateServer-style GDPS? Start with the **[Migration Kit](docs/MIGRATION_KIT.md)**. It runs a read-only preflight first, creates a verified target backup before apply, uses the existing transactional importer, and performs a post-migration healthcheck.
 
 MuchoCore is designed so you do not have to assemble PHP, MariaDB and Caddy manually.
 
@@ -533,6 +539,8 @@ Before large changes, back up the database and verify that your Cloud Save secre
 
 | Document | Purpose |
 | --- | --- |
+| [Getting Started](docs/GETTING_STARTED.md) | Shortest path from VPS to a working GDPS |
+| [Migration Kit](docs/MIGRATION_KIT.md) | Safe Cvolton/fhGDPS-style migration workflow |
 | [Setup](docs/SETUP.md) | VPS installation, updates and backups |
 | [Client Setup](docs/CLIENT_SETUP.md) | Windows, Android and client patching |
 | [Version Profiles](docs/VERSIONS.md) | Geometry Dash generation handling |
@@ -564,6 +572,10 @@ This release focuses on making MuchoCore easier to discover, easier to evaluate 
 - non-canonical GDPS hosts return **404** for MuchoCore product/discovery paths;
 - fresh installations default the public MuchoCore discovery host to **disabled.invalid**;
 - normal GDPS tenant navigation no longer exposes the MuchoCore product page automatically;
+- added the operator-friendly **Migration Kit** for Cvolton/GMDprivateServer-style migrations with read-only preflight, verified target backup, transactional apply, post-migration healthcheck and local migration reports;
+- added **GETTING_STARTED.md** as the shortest installation and migration guide for new GDPS owners;
+- added a dedicated **MIGRATION_KIT.md** with exact commands, safety model, password handling and migration scope;
+- added automated Migration Kit contract checks to the release validation suite;
 - the same version-aware backend and production tooling remain available across the supported Geometry Dash generations documented above.
 
 ### Release safety
