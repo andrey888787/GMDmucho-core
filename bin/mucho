@@ -223,6 +223,7 @@ doctor() {
     domain="$(env_get DOMAIN)"
     if [[ -n "$(env_get MUCHO_TUNNEL_TOKEN)" ]]; then
         health="$(curl -4fsSf --connect-timeout 3 --max-time 5 http://127.0.0.1/health 2>/dev/null || true)"
+        [[ "$health" == "1" ]] && echo "✓ /health (tunnel)" || { echo "✗ /health (tunnel)"; ok=1; }
     elif [[ -n "$domain" ]]; then
         health="$(curl -4ksSf --connect-timeout 3 --max-time 5             --resolve "$domain:443:127.0.0.1" "https://$domain/health" 2>/dev/null || true)"
         [[ "$health" == "1" ]] && echo "✓ /health" || { echo "✗ /health"; ok=1; }
@@ -280,9 +281,12 @@ configuration_menu() {
         clear
         show_settings
         echo "1) Change domain"
-        echo "2) Change GD compatibility profile"
-        echo "3) Toggle YouTube import"
-        echo "4) Toggle music moderation"
+        echo "2) Change database password"
+        echo "3) Change admin password"
+        echo "4) Change GD compatibility profile"
+        echo "5) Toggle YouTube import"
+        echo "6) Toggle music moderation"
+        echo "7) Automatic updates"
         echo "0) Back"
         echo
         local choice
