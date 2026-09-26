@@ -87,6 +87,7 @@ jobs:
           php tests/application/core-refactor-contract.php
           php tests/security/turnstile.php
           php tests/runtime/php-runtime-contract.php
+          php tests/application/migration-center-contract.php
           php tests/client/client-trace.php
           php tests/security/muchoprotect.php
           php tests/client/windows-client-patcher.php
@@ -115,6 +116,7 @@ jobs:
           test -f auto-update.sh
           test -f bin/mucho-install-auto-update.sh
           test -f bin/mucho
+          test -f bin/mucho-migrate.php
           test -f bin/muchodb-password
           test -f tests/release/vps-control-center.sh
           test -f docs/AUTO_UPDATE.md
