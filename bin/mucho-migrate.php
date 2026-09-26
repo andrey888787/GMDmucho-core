@@ -115,7 +115,7 @@ try {
     }
 
     if (!isset($options["apply"])) {
-        echo PHP_EOL."DRY-RUN complete. The destination was not modified by the import.".PHP_EOL;
+        echo PHP_EOL."Dry-run complete. The destination was not modified by the import.".PHP_EOL;
         exit(0);
     }
 
