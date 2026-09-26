@@ -93,7 +93,7 @@ DELETED="$(
     find "$BACKUP_DIR" \
       -type f \
       -mmin +"$RETENTION_MINUTES" \
-      \\( -name '*.sql.gz' -o -name '*.sql.gz.sha256' \\) \
+      \( -name '*.sql.gz' -o -name '*.sql.gz.sha256' \) \
       -print -delete | wc -l
 )"
 
