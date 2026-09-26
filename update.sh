@@ -19,7 +19,7 @@ install -d -m 700 "$ROOT/.secrets"
 
 ensure_hosted_test_secrets() {
     # Docker Compose reads secret files while parsing/creating services, so
-    # these files must exist before any compose command touches testgdps.
+    # these files support the local integration-test tenant.
     install -d -m 700 "$ROOT/.secrets"
 
     if [[ ! -s "$ROOT/.secrets/testgdps_db_password" ]]; then
@@ -103,7 +103,7 @@ grep -q '^TZ=' "$ROOT/.env" 2>/dev/null || printf 'TZ=UTC\n' >> "$ROOT/.env"
 grep -q '^TURNSTILE_SITEKEY=' "$ROOT/.env" 2>/dev/null || printf 'TURNSTILE_SITEKEY=\n' >> "$ROOT/.env"
 grep -q '^TURNSTILE_SECRET=' "$ROOT/.env" 2>/dev/null || printf 'TURNSTILE_SECRET=\n' >> "$ROOT/.env"
 grep -q '^MUCHO_GD_VERSIONS=' "$ROOT/.env" 2>/dev/null || printf 'MUCHO_GD_VERSIONS=all\n' >> "$ROOT/.env"
-grep -q '^CADDY_EXTRA_HOSTS=' "$ROOT/.env" 2>/dev/null || printf 'CADDY_EXTRA_HOSTS=testgdps.muchogdps.space\n' >> "$ROOT/.env"
+grep -q '^CADDY_EXTRA_HOSTS=' "$ROOT/.env" 2>/dev/null || printf 'CADDY_EXTRA_HOSTS=\n' >> "$ROOT/.env"
 grep -q '^MUCHOCORE_SITE_HOST=' "$ROOT/.env" 2>/dev/null || printf 'MUCHOCORE_SITE_HOST=disabled.invalid\n' >> "$ROOT/.env"
 MUCHOCORE_SITE_HOST="$(sed -n 's/^MUCHOCORE_SITE_HOST=//p' "$ROOT/.env" | head -n1 || true)"
 [[ "$MUCHOCORE_SITE_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || {
