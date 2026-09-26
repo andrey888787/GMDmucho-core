@@ -218,7 +218,7 @@ jobs:
           grep -Fq 'path /.env* /.git/* /composer.json /composer.lock /config/* /src/* /tests/* /storage/*' docker/Caddyfile
           grep -Fq 'auto_https disable_redirects' docker/Caddyfile
           ! grep -Fq 'testgdps.muchogdps.space' docker/Caddyfile
-          grep -Fq 'testgdps-app:9000' docker/Caddyfile
+          ! grep -Fq 'testgdps-app:9000' docker/Caddyfile
           grep -Fq 'testgdps-db' docker-compose.yml
           grep -Fq 'testgdps-app' docker-compose.yml
           grep -Fq 'DB_HOST=${DB_HOST:-db}' docker/app-entrypoint.sh
