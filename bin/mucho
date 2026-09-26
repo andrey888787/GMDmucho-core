@@ -289,32 +289,21 @@ database_menu() {
         echo
         compose exec -T app php bin/migrate.php status || true
         echo
-        echo "1) Apply pending migrations"
-        echo "2) Show Cvolton import command"
+        echo "1) Migration Center"
+        echo "2) Apply pending core migrations"
         echo "0) Back"
         echo
         local choice
         read -r -p "Select: " choice
         case "$choice" in
-            1)
-                compose exec -T app php bin/migrate.php migrate
-                ;;
-            2)
-                echo
-                echo "Cvolton import is dry-run by default."
-                echo "Use bin/import-cvolton-db.php with --confirm=COVOLTON only when ready to apply."
-                echo
-                echo "Example:"
-                echo "  docker compose exec -T app php bin/import-cvolton-db.php \\"
-                echo "    --source-host=HOST --source-db=DATABASE --source-user=USER"
-                ;;
+            1) compose exec app php bin/mucho-migrate.php ;;
+            2) compose exec -T app php bin/migrate.php migrate ;;
             0) return ;;
             *) echo "Invalid selection." ;;
         esac
         read -r -p "Press Enter..." _
     done
 }
-
 configuration_menu() {
     while true; do
         clear
