@@ -6,6 +6,11 @@
 </p>
 
 <p align="center">
+  <a href="https://muchogdps.space/muchocore/">🌐 MuchoCore product page</a> ·
+  <a href="https://github.com/IZKGMD/GMDmucho-core/releases">📦 Releases</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/IZKGMD/GMDmucho-core/actions/workflows/validate.yml">
     <img src="https://github.com/IZKGMD/GMDmucho-core/actions/workflows/validate.yml/badge.svg" alt="CI">
   </a>
