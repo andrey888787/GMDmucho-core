@@ -107,6 +107,7 @@ jobs:
         if: steps.marker.outputs.ready == 'true' || steps.marker.outputs.archive_only == 'true'
         env:
           TAG: ${{ steps.marker.outputs.tag }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
           git archive --format=zip --prefix="MuchoCore-${TAG}/" -o "MuchoCore-${TAG}.zip" "$TAG" -- \
