@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.0.4 — MuchoCore Discovery & Tenant Isolation
+
+### Product Page
+
+- added the canonical MuchoCore product page at `/muchocore/`;
+- added machine-readable SoftwareApplication and FAQ structured data;
+- added explicit documentation for compatibility, architecture, Cvolton migration, plugins, security, deployment and administration;
+- added a responsive layout and direct links to source, releases and setup documentation.
+
+### Search & AI Discovery
+
+- added `robots.txt` with crawler directives for OAI-SearchBot, GPTBot, Googlebot and Google-Extended;
+- added `sitemap.xml` for the canonical MuchoCore web surface;
+- added `llms.txt` with canonical sources and project facts;
+- linked the canonical product page from the public project homepage and README.
+
+### Tenant Isolation
+
+- added `MUCHOCORE_SITE_HOST` as the explicit host allow-list for the public MuchoCore discovery surface;
+- product/discovery paths return 404 on non-canonical GDPS hosts;
+- fresh installations default `MUCHOCORE_SITE_HOST` to `disabled.invalid`, so tenant owners do not receive the MuchoCore product page automatically;
+- removed the MuchoCore product-page link from normal GDPS tenant navigation.
+
+---
+
 ## Unreleased
 
 ### Clan System v2
