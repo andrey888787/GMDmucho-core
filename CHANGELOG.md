@@ -21,7 +21,11 @@
 - added `MUCHOCORE_SITE_HOST` as the explicit host allow-list for the public MuchoCore discovery surface;
 - product/discovery paths return 404 on non-canonical GDPS hosts;
 - fresh installations default `MUCHOCORE_SITE_HOST` to `disabled.invalid`, so tenant owners do not receive the MuchoCore product page automatically;
-- removed the MuchoCore product-page link from normal GDPS tenant navigation.
+- removed the MuchoCore product-page link from normal GDPS tenant navigation;
+- added the operator-friendly Migration Kit with read-only preflight, target backup, transactional apply, post-migration healthcheck and migration reports;
+- added `docs/GETTING_STARTED.md` as the shortest installation and migration path;
+- added `docs/MIGRATION_KIT.md` with migration commands, safety behavior, password handling and current scope;
+- added automated Migration Kit contract checks to release validation.
 
 ---
 
