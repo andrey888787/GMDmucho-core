@@ -1,40 +1,42 @@
 # MuchoCore — Start Here
 
-MuchoCore can be deployed without deep PHP or Docker knowledge.
-
-## What it is
-
-MuchoCore is a backend for Geometry Dash Private Servers.
-
-~~~text
-Geometry Dash
-     ↓
-MuchoCore
-     ↓
-MariaDB
-~~~
+MuchoCore is a modern Geometry Dash Private Server core for owners who want a maintainable backend, version-aware compatibility and production tooling without assembling every component by hand.
 
 ## New to MuchoCore?
 
-For a normal VPS deployment, start with:
+Use the shortest installation path:
 
 ~~~bash
+git clone https://github.com/IZKGMD/GMDmucho-core.git
+cd GMDmucho-core
 sudo ./install
 ~~~
 
-The installer guides you through the domain, administrator password and Geometry Dash compatibility profile.
+Or read **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the complete first-run path.
 
-Supported profiles:
+## Already running a Cvolton/GMDprivateServer-style GDPS?
+
+Start with **[docs/MIGRATION_KIT.md](docs/MIGRATION_KIT.md)**.
+
+The safe migration flow is:
 
 ~~~text
-GD 1.9
-GD 2.0
-GD 2.1
-GD 2.2
-Any supported combination
+Source GDPS
+    ↓
+Read-only preflight
+    ↓
+Review source counts
+    ↓
+Verified MuchoCore backup
+    ↓
+Transactional import
+    ↓
+Post-migration healthcheck
+    ↓
+Test client
 ~~~
 
-See `docs/VERSIONS.md` for how the version profiles work.
+Dry-run is the default. Nothing is imported until `--apply --confirm=COVOLTON` is supplied.
 
 ## After installation
 
@@ -62,30 +64,44 @@ Administrator username:
 admin
 ~~~
 
-The password is the one created during installation.
+The password is created during installation.
+
+## Compatibility
+
+The documented runtime profiles cover:
+
+~~~text
+GD 1.0
+GD 1.1
+GD 1.5
+GD 1.9
+GD 2.0
+GD 2.1
+GD 2.2
+Custom combinations
+~~~
+
+See **[docs/VERSIONS.md](docs/VERSIONS.md)** and **[docs/CLIENT_COMPATIBILITY.md](docs/CLIENT_COMPATIBILITY.md)**.
 
 ## Connect a client
 
-After the server is healthy, use:
+After the server is healthy, use **[docs/CLIENT_SETUP.md](docs/CLIENT_SETUP.md)**.
 
-~~~text
-docs/CLIENT_SETUP.md
-~~~
-
-For Windows clients, the repository includes a client patcher under `tools/client/`.
+Windows patching tools live under `tools/client/`; Android patching is available through the Admin Panel workflow.
 
 ## Main directories
 
 ~~~text
 src/       — server logic
-public/    — HTTP entry points and GD endpoints
+public/    — HTTP entry points, GD endpoints and Admin Panel
 database/  — database migrations
-config/    — local configuration and keys
-storage/   — runtime data and service files
-tests/     — automated tests
-tools/     — client and development tools
-docs/      — documentation
+config/    — local configuration and examples
+storage/   — runtime data
+tests/     — automated validation and compatibility checks
+tools/     — client and migration tools
+docs/      — setup, migration, compatibility and deployment documentation
 docker/    — Docker and Caddy files
+custom/    — persistent GDPS-specific extensions
 ~~~
 
 ## Security
@@ -94,9 +110,9 @@ Do not publish or commit:
 
 ~~~text
 .env
+.secrets/
 config/cloudsave.key
 storage/
-.secrets/
 ~~~
 
-Do not run `uninstall.sh` unless you understand that the database volume will be removed.
+Before major maintenance, create a database backup. Do not run `uninstall.sh` unless you understand that the database volume will be removed.
