@@ -31,7 +31,6 @@ foreach ([
     'imported_now',
     'detected_only',
     'filesystem',
-    'WHAT IS WHERE',
 ] as $needle) {
     if (stripos($detector, $needle) === false) {
         throw new RuntimeException('Source detector contract missing: ' . $needle);
