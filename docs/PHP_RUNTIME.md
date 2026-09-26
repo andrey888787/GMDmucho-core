@@ -14,11 +14,11 @@ The Dockerfile keeps the version behind `PHP_VERSION`, so the runtime can move t
 
 MuchoCore currently declares:
 
-    PHP >= 8.3 and < 9.0
+    PHP ^8.3
 
 CI continuously checks PHP 8.3, 8.4 and 8.5. PHP 8.5 is the production target; the older supported branches are compatibility coverage.
 
-This split lets MuchoCore ship on the current runtime while avoiding unnecessary breakage for installations that still need an older supported PHP branch.
+This split lets MuchoCore ship on PHP 8.5 while retaining compatibility with PHP 8.3 and 8.4 installations during the current PHP 8.x lifecycle.
 
 ## Updating PHP
 
