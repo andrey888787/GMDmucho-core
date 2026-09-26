@@ -30,6 +30,8 @@ assert_contains bin/mucho 'Change database password'
 assert_contains bin/mucho 'Change admin password'
 assert_contains bin/mucho 'Mucho Doctor'
 assert_contains bin/mucho 'Database backup'
+assert_contains bin/mucho 'Database & migrations'
+assert_contains bin/mucho 'Apply pending migrations'
 assert_contains bin/mucho 'Toggle YouTube import'
 assert_contains bin/mucho 'Toggle music moderation'
 

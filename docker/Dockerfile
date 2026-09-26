@@ -1,4 +1,5 @@
-FROM php:8.3-fpm-bookworm
+ARG PHP_VERSION=8.5
+FROM php:${PHP_VERSION}-fpm-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip openssl libzip-dev android-sdk-build-tools ffmpeg python3 curl ca-certificates \
@@ -16,8 +17,8 @@ RUN apt-get update \
     && rm -f /tmp/deno.zip \
     && docker-php-ext-install pdo_mysql zip \
     && docker-php-ext-enable opcache \
-    && printf '%s\n' 'display_errors=0' 'display_startup_errors=0' 'log_errors=1' 'expose_php=0' 'memory_limit=256M' 'max_execution_time=60' 'max_input_time=60' 'upload_max_filesize=64M' 'post_max_size=70M' 'max_file_uploads=20' > /usr/local/etc/php/conf.d/muchocore-production.ini \
-    && printf '%s\n' 'clear_env = no' > /usr/local/etc/php-fpm.d/zz-muchocore-environment.conf \
+    && printf '%s\\n' 'display_errors=0' 'display_startup_errors=0' 'log_errors=1' 'expose_php=0' 'memory_limit=256M' 'max_execution_time=60' 'max_input_time=60' 'upload_max_filesize=64M' 'post_max_size=70M' 'max_file_uploads=20' > /usr/local/etc/php/conf.d/muchocore-production.ini \
+    && printf '%s\\n' 'clear_env = no' > /usr/local/etc/php-fpm.d/zz-muchocore-environment.conf \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer

@@ -81,6 +81,9 @@ show_status() {
     echo "----------------"
     echo "Version: $(tr -d '[:space:]' < "$ROOT/VERSION" 2>/dev/null || echo unknown)"
     echo "Domain:  $(env_get DOMAIN)"
+    local php_version
+    php_version="$(compose exec -T app php -r 'echo PHP_VERSION;' 2>/dev/null || echo unknown)"
+    echo "PHP:     $php_version"
     echo
     compose ps
 }
@@ -252,11 +255,12 @@ main_menu() {
         echo
         echo "1) Server status"
         echo "2) Configuration"
-        echo "3) Update MuchoCore"
-        echo "4) Database backup"
-        echo "5) Restart services"
-        echo "6) Show logs"
-        echo "7) Mucho Doctor"
+        echo "3) Database & migrations"
+        echo "4) Update MuchoCore"
+        echo "5) Database backup"
+        echo "6) Restart services"
+        echo "7) Show logs"
+        echo "8) Mucho Doctor"
         echo "0) Exit"
         echo
 
@@ -265,17 +269,41 @@ main_menu() {
         case "$choice" in
             1) show_status; read -r -p "Press Enter..." _ ;;
             2) configuration_menu ;;
-            3) "$ROOT/update.sh"; read -r -p "Press Enter..." _ ;;
-            4) "$ROOT/bin/mucho-db-backup.sh"; read -r -p "Press Enter..." _ ;;
-            5) restart_services; echo "Services restarted."; read -r -p "Press Enter..." _ ;;
-            6) cd "$ROOT"; compose logs --tail=120; read -r -p "Press Enter..." _ ;;
-            7) doctor || true; read -r -p "Press Enter..." _ ;;
+            3) database_menu ;;
+            4) "$ROOT/update.sh"; read -r -p "Press Enter..." _ ;;
+            5) "$ROOT/bin/mucho-db-backup.sh"; read -r -p "Press Enter..." _ ;;
+            6) restart_services; echo "Services restarted."; read -r -p "Press Enter..." _ ;;
+            7) cd "$ROOT"; compose logs --tail=120; read -r -p "Press Enter..." _ ;;
+            8) doctor || true; read -r -p "Press Enter..." _ ;;
             0) exit 0 ;;
             *) echo "Invalid selection."; sleep 1 ;;
         esac
     done
 }
 
+database_menu() {
+    while true; do
+        clear
+        echo "MuchoCore Database & Migrations"
+        echo "-------------------------------"
+        echo
+        compose exec -T app php bin/migrate.php status || true
+        echo
+        echo "1) Migration Center"
+        echo "2) Apply pending migrations"
+        echo "0) Back"
+        echo
+        local choice
+        read -r -p "Select: " choice
+        case "$choice" in
+            1) compose exec app php bin/mucho-migrate.php ;;
+            2) compose exec -T app php bin/migrate.php migrate ;;
+            0) return ;;
+            *) echo "Invalid selection." ;;
+        esac
+        read -r -p "Press Enter..." _
+    done
+}
 configuration_menu() {
     while true; do
         clear
