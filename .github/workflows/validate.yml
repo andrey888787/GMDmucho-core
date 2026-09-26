@@ -13,7 +13,7 @@ jobs:
       - name: Set up PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.5"
           extensions: mbstring, pdo_mysql, zip
           tools: composer
 
@@ -86,6 +86,7 @@ jobs:
           php tests/application/clan-dashboard-contract.php
           php tests/application/core-refactor-contract.php
           php tests/security/turnstile.php
+          php tests/runtime/php-runtime-contract.php
           php tests/client/client-trace.php
           php tests/security/muchoprotect.php
           php tests/client/windows-client-patcher.php
@@ -293,4 +294,37 @@ jobs:
         shell: powershell
         run: |
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/client/client-patcher.ps1 -SelfTest
+
+
+  php-runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.3", "8.4", "8.5"]
+    runs-on: ubuntu-latest
+    name: PHP ${{ matrix.php-version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, pdo_mysql, zip
+          tools: composer
+
+      - name: Validate Composer manifest
+        run: composer validate --strict --no-check-publish
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Check PHP sources
+        run: |
+          find src public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+          php tests/runtime/php-runtime-contract.php
+          php tests/client/client-compatibility.php
+          php tests/protocol/protocol-matrix.php
+          php tests/application/core-refactor-contract.php
+          php tests/application/plugin-sdk-contract.php
 
