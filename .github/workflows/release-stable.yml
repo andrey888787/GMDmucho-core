@@ -109,8 +109,32 @@ jobs:
           TAG: ${{ steps.marker.outputs.tag }}
         run: |
           git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
-          git archive --format=zip --prefix="MuchoCore-${TAG}/" "$TAG" -o "MuchoCore-${TAG}.zip"
+          rm -rf archive-work "MuchoCore-${TAG}.zip"
+          mkdir -p archive-work
+          git archive --format=tar --prefix="MuchoCore-${TAG}/" "$TAG" | tar -xf - -C archive-work
+
+          # Archive-only refreshes intentionally keep the stable tag immutable while
+          # allowing approved documentation/tooling files to be synchronized into the release asset.
+          if [[ "${{ steps.marker.outputs.archive_only }}" == "true" ]]; then
+            for path in \
+              README.md \
+              CHANGELOG.md \
+              docs/GETTING_STARTED.md \
+              docs/MIGRATION_KIT.md \
+              docs/CVOLTON_MIGRATION.md \
+              tools/migration/mucho-migrate.sh \
+              tests/release/migration-kit.sh; do
+              mkdir -p "archive-work/MuchoCore-${TAG}/$(dirname "$path")"
+              cp "$path" "archive-work/MuchoCore-${TAG}/$path"
+            done
+          fi
+
+          (
+            cd archive-work
+            zip -qr "../MuchoCore-${TAG}.zip" "MuchoCore-${TAG}"
+          )
           test -s "MuchoCore-${TAG}.zip"
+          rm -rf archive-work
 
       - name: Upload source archive
         if: steps.marker.outputs.ready == 'true' || steps.marker.outputs.archive_only == 'true'
