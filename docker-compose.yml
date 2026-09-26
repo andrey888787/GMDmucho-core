@@ -91,7 +91,7 @@ services:
       MUCHO_DB_PASSWORD_FILE: /run/secrets/testgdps_db_password
       ADMIN_USER: testowner
       MUCHO_ADMIN_PASSWORD_FILE: /run/secrets/testgdps_admin_password
-      MUCHO_ACCOUNT_URL: https://testgdps.muchogdps.space
+      MUCHO_ACCOUNT_URL: http://testgdps.local
       MUCHO_CUSTOM_CONTENT_URL: ${MUCHO_CUSTOM_CONTENT_URL}
       MUCHO_ADMIN_BOOTSTRAP: /etc/muchocore-admin.php
       MUCHO_CONTROL_DIR: /var/lib/muchocore-test-control
