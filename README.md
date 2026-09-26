@@ -9,9 +9,9 @@
   <a href="https://github.com/IZKGMD/GMDmucho-core/actions/workflows/validate.yml">
     <img src="https://github.com/IZKGMD/GMDmucho-core/actions/workflows/validate.yml/badge.svg" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/release-v1.0.4-8A2BE2" alt="Stable release">
+  <img src="https://img.shields.io/badge/release-v1.0.3-8A2BE2" alt="Stable release">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
-  <img src="https://img.shields.io/badge/PHP-8.3-777BB4" alt="PHP 8.3">
+  <img src="https://img.shields.io/badge/PHP-8.5-777BB4" alt="PHP 8.5">
   <img src="https://img.shields.io/badge/Geometry%20Dash-1.0%20%E2%80%93%202.2-success" alt="Geometry Dash 1.0 through 2.2">
   <img src="https://img.shields.io/badge/MuchoProtect-enabled-success" alt="MuchoProtect">
   <img src="https://img.shields.io/badge/Docker-ready-2496ED" alt="Docker">
@@ -27,6 +27,7 @@
   <a href="docs/SHOWCASE.md">🌍 Showcase</a> ·
   <a href="docs/ADMIN_RBAC.md">🔐 Admin RBAC</a> ·
   <a href="docs/CUSTOM_PLUGINS.md">🧩 Custom Plugins</a> ·
+  <a href="docs/MIGRATION_CENTER.md">🔄 Migration Center</a> ·
   <a href="https://discord.gg/8yRyH2Tngp">💬 Discord</a>
 </p>
 
@@ -46,10 +47,10 @@
 | 🖥️ **Admin Control** | Dashboard, players, levels, moderation, analytics, monitoring, backups, API tools and server settings |
 | ⭐ **Rating Studio** | Search levels by ID/name/creator, review pending requests, publish 0–10 star ratings, choose difficulty faces, feature tiers and audit the change |
 | 🔐 **Admin security** | Separate administrator accounts, password login, native WebAuthn/FIDO2 passkeys, Google Authenticator TOTP, one-time recovery codes, self-service password setup for invited admins, customizable RBAC permissions, rate limiting and audit logging |
-| 🔄 **Cvolton migration** | Read-only source DB preflight, account/profile/level/score migration, persistent ID mapping and transactional apply |
+| 🔄 **Migration Center** | Guided read-only source scan, schema detection, clear data-location report, dry-run preview, persistent ID mapping and transactional apply |
 | 🏰 **Clans** | Player-dashboard clan directory, owner/officer/member permissions, membership, invitations, applications, bans, live aggregated statistics, clan rankings, deletion and server-side in-game clan-tag display |
 | 🧰 **Client patchers** | Windows desktop patcher, browser-based Windows patcher and Android APK patcher |
-| 🐳 **Deployment** | Docker Compose, MariaDB, PHP 8.3, Caddy, automatic migrations, one-command installation, interactive Control Center, backups and release detection |
+| 🐳 **Deployment** | Docker Compose, MariaDB, PHP 8.5 runtime, Caddy, automatic migrations, one-command installation, interactive Control Center, backups and release detection |
 | 🧪 **Validation** | PHP, shell, protocol, wire-format, security, patcher, Docker and Caddy checks in GitHub Actions |
 | 🏗️ **Architecture** | Thin application bootstrap, isolated request pipeline, centralized dependency/route wiring and explicit compatibility modules |
 
@@ -152,6 +153,140 @@ Patch the client
   ↓
 🎮 GDPS online
 ```
+
+---
+
+## 🔄 Migration Center
+
+MuchoCore is built to make moving an existing GDPS understandable instead of turning migration into a manual SQL project.
+
+Open it from the VPS:
+
+~~~bash
+sudo mucho
+~~~
+
+Then:
+
+~~~text
+Database & migrations
+→ Migration Center
+~~~
+
+### The wizard explains every field
+
+Before connecting, the wizard tells the operator exactly what each value means and where to find it:
+
+~~~text
+Old DB host = MySQL/MariaDB server of the OLD GDPS.
+              NOT the website URL.
+
+Old DB port = usually 3306.
+
+Old DB name = exact database name of the OLD GDPS.
+              Find it in the old hosting/database panel,
+              phpMyAdmin, or the old server configuration.
+
+Old DB user = MySQL/MariaDB user with SELECT access.
+
+Old DB password = password for that database user.
+~~~
+
+The database address and the website address are different things. `https://example.com` is not a MySQL host.
+
+### First scan: read-only
+
+The first run is always a **dry-run**.
+
+The source connection is opened with:
+
+~~~sql
+SET SESSION TRANSACTION READ ONLY
+~~~
+
+Nothing is imported during the scan.
+
+The wizard detects the schema and then shows:
+
+~~~text
+SOURCE DETECTED
+
+Family:          Cvolton-compatible GDPS schema
+Confidence:      high
+
+CORE MIGRATION PREVIEW
+  Accounts
+  Profiles
+  Levels
+  Classic scores
+  Platformer scores
+~~~
+
+It also prints a **WHAT IS WHERE** report so the operator can see which source tables contain the other datasets.
+
+### Data is never hidden behind a fake "100% migrated" message
+
+Migration Center distinguishes three states:
+
+~~~text
+READY
+  MuchoCore has an automatic importer for this dataset.
+
+DETECTED
+  The old database contains this data, but a safe automatic mapping
+  has not been implemented yet. It is reported instead of silently lost.
+
+FILES
+  Database metadata is available, but the actual data also includes
+  files on the old server filesystem.
+~~~
+
+For MegaSa1nt/Cvolton-style databases, the scan can identify areas such as:
+
+~~~text
+accounts + users
+levels
+levelscores + platscores
+comments + account comments
+friends + friend requests + blocks + messages
+lists + map packs + gauntlets + daily selections
+legacy moderation / roles
+songs
+old music/ and sfx/ files
+~~~
+
+The current automatic importer handles accounts, profiles, levels and available classic/Platformer scores. Additional detected datasets are explicitly reported instead of being presented as imported.
+
+### MegaSa1nt / FHGDPS compatibility
+
+MegaSa1nt's GMDprivateServer is a fork of Cvolton's GMDprivateServer and uses a Cvolton-compatible database family.
+
+MuchoCore therefore detects the **schema**, not a product name. A matching extended table signature can be displayed as:
+
+~~~text
+MegaSa1nt-style / FHGDPS-compatible Cvolton schema
+~~~
+
+This is a compatibility description, not a claim about the origin of an arbitrary database.
+
+### Safe apply
+
+The intended workflow is:
+
+~~~text
+1. Connect to the OLD database.
+2. Run the dry-run scan.
+3. Read WHAT IS WHERE.
+4. Check the account / level / score counts.
+5. Back up the MuchoCore database.
+6. Run the migration with apply enabled.
+7. Confirm by typing MIGRATE.
+8. Verify the new server with Mucho Doctor and /health.
+~~~
+
+Repeated imports use persistent source-to-target account and level mappings so the same source records are reconciled instead of blindly duplicated.
+
+See **[docs/MIGRATION_CENTER.md](docs/MIGRATION_CENTER.md)** for the complete field-by-field guide.
 
 ---
 
@@ -580,9 +715,9 @@ Before large changes, back up the database and verify that your Cloud Save secre
 
 ---
 
-## 📦 MuchoCore v1.0.3
+## 📦 Release status
 
-**v1.0.3** is the current stable release line for the MuchoCore architecture.
+**v1.0.3** is the current stable release line. The `feat/platform-foundation-1.1` branch contains upcoming platform work, including the PHP 8.5 runtime and the expanded Migration Center.
 
 It brings together:
 
@@ -595,6 +730,7 @@ It brings together:
 - Windows and Android client patchers;
 - Docker + Caddy deployment;
 - automatic migrations;
+- Migration Center with source-schema inspection and dry-run preview;
 - reproducible CI validation;
 - client trace and contract tooling.
 
