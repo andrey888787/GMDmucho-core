@@ -290,7 +290,7 @@ database_menu() {
         compose exec -T app php bin/migrate.php status || true
         echo
         echo "1) Migration Center"
-        echo "2) Apply pending core migrations"
+        echo "2) Apply pending migrations"
         echo "0) Back"
         echo
         local choice
