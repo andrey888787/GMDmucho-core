@@ -10,6 +10,8 @@ final class SourceDetector
 {
     /**
      * Detect a source database by schema, not by product name.
+     * GDPS-Maker commonly provisions a Cvolton-compatible database, so the
+     * schema family remains the source of truth instead of the product name.
      * The source is read only; this class performs metadata/SELECT queries only.
      *
      * @return array{
