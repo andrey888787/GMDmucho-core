@@ -546,25 +546,31 @@ Before large changes, back up the database and verify that your Cloud Save secre
 
 ---
 
-## 📦 MuchoCore v1.0.3
+## 📦 MuchoCore v1.0.4
 
-**v1.0.3** is the current stable release line for the MuchoCore architecture.
+**v1.0.4** is the current stable release of MuchoCore.
 
-It brings together:
+This release focuses on making MuchoCore easier to discover, easier to evaluate before adoption, and safer to run alongside existing GDPS tenant deployments.
 
-- one version-aware GDPS backend supporting GD 1.0, 1.1, 1.5, 1.9, 2.0, 2.1 and 2.2;
-- MuchoProtect request protection;
-- the Admin Control Panel;
-- Rating Studio moderation tools;
-- Google Authenticator 2FA and native WebAuthn/FIDO2 passkeys;
-- Cloud Save;
-- Windows and Android client patchers;
-- Docker + Caddy deployment;
-- automatic migrations;
-- reproducible CI validation;
-- client trace and contract tooling.
+### Included
 
-See **[CHANGELOG.md](CHANGELOG.md)** and the **[v1.0.3 release](https://github.com/IZKGMD/GMDmucho-core/releases/tag/v1.0.3)** for release-specific verification details.
+- canonical MuchoCore product page at **[/muchocore/](https://muchogdps.space/muchocore/)**;
+- machine-readable SoftwareApplication and FAQ structured data;
+- dedicated documentation coverage for compatibility, architecture, Cvolton migration, plugins, security, deployment and administration;
+- responsive product-page layout with direct links to source, releases and setup documentation;
+- crawler directives for OAI-SearchBot, GPTBot, Googlebot and Google-Extended;
+- canonical **sitemap.xml** and **llms.txt** discovery surfaces;
+- explicit **MUCHOCORE_SITE_HOST** isolation for the public MuchoCore discovery surface;
+- non-canonical GDPS hosts return **404** for MuchoCore product/discovery paths;
+- fresh installations default the public MuchoCore discovery host to **disabled.invalid**;
+- normal GDPS tenant navigation no longer exposes the MuchoCore product page automatically;
+- the same version-aware backend and production tooling remain available across the supported Geometry Dash generations documented above.
+
+### Release safety
+
+v1.0.4 is a published stable GitHub Release and is the version referenced by the repository's release/update tooling.
+
+See **[CHANGELOG.md](CHANGELOG.md)** and the **[v1.0.4 release](https://github.com/IZKGMD/GMDmucho-core/releases/tag/v1.0.4)** for release-specific details.
 
 ---
 
