@@ -9,7 +9,7 @@ use PDO;
 final class SourceDetector
 {
     /**
-     * Detect a source database by schema, not by product name.
+     * Detect a source database by schema, not by product name. The source is read only.
      *
      * GDPS-Maker commonly provisions a Cvolton-compatible database, so both
      * should be reported as the same import family when the schema matches.
