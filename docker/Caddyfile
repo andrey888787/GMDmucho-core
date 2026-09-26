@@ -22,7 +22,10 @@
 
     # Serve the MuchoCore product page explicitly. Do not rely on the
     # application/PHP fallback for this static discovery surface.
-    @muchocore_root host {$MUCHOCORE_SITE_HOST}
+    @muchocore_root {
+        host {$MUCHOCORE_SITE_HOST}
+        path /muchocore
+    }
     handle @muchocore_root {
         redir /muchocore /muchocore/ 308
     }
