@@ -26,8 +26,8 @@ if (strpos($dockerfile, "FROM php:${PHP_VERSION}-fpm-bookworm") === false) {
     throw new RuntimeException("Docker runtime must use the configurable PHP_VERSION argument.");
 }
 
-if (strpos($composer, '"php": ">=8.3 <9.0"') === false) {
-    throw new RuntimeException("Composer must declare the supported PHP runtime window.");
+if (strpos($composer, '"php": "^8.3"') === false) {
+    throw new RuntimeException("Composer must retain the PHP 8.x compatibility contract.");
 }
 
 foreach (['"8.3"', '"8.4"', '"8.5"'] as $version) {
