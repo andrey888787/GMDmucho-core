@@ -221,7 +221,9 @@ doctor() {
 
     local domain health
     domain="$(env_get DOMAIN)"
-    if [[ -n "$domain" ]]; then
+    if [[ -n "$(env_get MUCHO_TUNNEL_TOKEN)" ]]; then
+        health="$(curl -4fsSf --connect-timeout 3 --max-time 5 http://127.0.0.1/health 2>/dev/null || true)"
+    elif [[ -n "$domain" ]]; then
         health="$(curl -4ksSf --connect-timeout 3 --max-time 5             --resolve "$domain:443:127.0.0.1" "https://$domain/health" 2>/dev/null || true)"
         [[ "$health" == "1" ]] && echo "✓ /health" || { echo "✗ /health"; ok=1; }
     else
