@@ -12,6 +12,8 @@ CUSTOM_CONTENT_URL="${MUCHO_CUSTOM_CONTENT_URL:-}"
 TURNSTILE_SITEKEY="${MUCHO_TURNSTILE_SITEKEY:-}"
 TURNSTILE_SECRET="${MUCHO_TURNSTILE_SECRET:-}"
 MUCHO_ADMIN_PASSWORD="${MUCHO_ADMIN_PASSWORD:-}"
+MUCHO_ENABLE_YOUTUBE_IMPORT="${MUCHO_ENABLE_YOUTUBE_IMPORT:-1}"
+MUCHO_MUSIC_MODERATION_REQUIRED="${MUCHO_MUSIC_MODERATION_REQUIRED:-1}"
 # Optional: set MUCHO_TUNNEL_TOKEN to deploy via Cloudflare Tunnel instead of
 # binding 80/443 directly. Use this on NAT/CGNAT VPS plans that have no
 # dedicated public IPv4 (inbound ports other than SSH are not reachable).
@@ -249,6 +251,8 @@ DB_NAME="${DB_NAME:-muchocore}"
 DB_USER="${DB_USER:-muchocore_user}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 CUSTOM_CONTENT_URL="${CUSTOM_CONTENT_URL:-https://geometrydashfiles.b-cdn.net}"
+MUCHO_AUTO_UPDATE="${MUCHO_AUTO_UPDATE:-1}"
+MUCHO_AUTO_UPDATE_INTERVAL="${MUCHO_AUTO_UPDATE_INTERVAL:-15min}"
 
 select_compatibility_profile
 
@@ -388,13 +392,26 @@ MUCHO_BACKUP_DIR=/var/lib/muchocore-backups
 TZ=UTC
 MUCHO_GD_VERSIONS=$GD_VERSIONS
 CADDY_EXTRA_HOSTS=$CADDY_EXTRA_HOSTS
-MUCHO_AUTO_UPDATE=1
-MUCHO_AUTO_UPDATE_INTERVAL=15min
+MUCHO_AUTO_UPDATE=$MUCHO_AUTO_UPDATE
+MUCHO_AUTO_UPDATE_INTERVAL=$MUCHO_AUTO_UPDATE_INTERVAL
+MUCHO_ENABLE_YOUTUBE_IMPORT=$MUCHO_ENABLE_YOUTUBE_IMPORT
+MUCHO_MUSIC_MODERATION_REQUIRED=$MUCHO_MUSIC_MODERATION_REQUIRED
 EOFENV
 if [[ -n "$TUNNEL_TOKEN" ]]; then
   printf 'MUCHO_TUNNEL_TOKEN=%s\n' "$TUNNEL_TOKEN" >> "$INSTALL_DIR/.env"
 fi
+install -d -m 770 "$INSTALL_DIR/storage/control"
+if [[ "$MUCHO_MUSIC_MODERATION_REQUIRED" == "1" ]]; then
+  : > "$INSTALL_DIR/storage/control/music-moderation-required.flag"
+else
+  rm -f "$INSTALL_DIR/storage/control/music-moderation-required.flag"
+fi
 chmod 600 "$INSTALL_DIR/.env"
+
+if [[ -f "$INSTALL_DIR/bin/mucho" ]]; then
+  install -m 755 "$INSTALL_DIR/bin/mucho" /usr/local/bin/mucho
+  log "Control Center installed: sudo mucho"
+fi
 
 if [[ -f "$INSTALL_DIR/bin/mucho-install-auto-update.sh" ]]; then
   log "Configuring release-based automatic updates..."
