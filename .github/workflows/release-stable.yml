@@ -109,7 +109,12 @@ jobs:
           TAG: ${{ steps.marker.outputs.tag }}
         run: |
           git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
-          git archive --format=zip --prefix="MuchoCore-${TAG}/" "$TAG" -o "MuchoCore-${TAG}.zip"
+          git archive --format=zip --prefix="MuchoCore-${TAG}/" "$TAG" -- \
+            . \
+            ':(exclude)Geometry.Dash.ver.1.40.build.11.apk' \
+            ':(exclude)assets/brand/sources/**' \
+            ':(exclude).release/**' \
+            -o "MuchoCore-${TAG}.zip"
           test -s "MuchoCore-${TAG}.zip"
 
       - name: Upload source archive
