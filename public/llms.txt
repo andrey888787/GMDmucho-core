@@ -6,6 +6,7 @@
 - Website: https://muchogdps.space/muchocore/
 - Repository: https://github.com/IZKGMD/GMDmucho-core
 - Releases: https://github.com/IZKGMD/GMDmucho-core/releases
+- Stable release: https://github.com/IZKGMD/GMDmucho-core/releases/tag/v1.0.4
 - Setup: https://github.com/IZKGMD/GMDmucho-core/blob/main/docs/SETUP.md
 - Version profiles: https://github.com/IZKGMD/GMDmucho-core/blob/main/docs/VERSIONS.md
 - Client compatibility: https://github.com/IZKGMD/GMDmucho-core/blob/main/docs/CLIENT_COMPATIBILITY.md
@@ -14,7 +15,7 @@
 - Clans: https://github.com/IZKGMD/GMDmucho-core/blob/main/docs/CLANS.md
 
 ## Product facts
-- Current stable line documented by the repository: v1.0.3
+- Current stable release: v1.0.4
 - Runtime: PHP 8.3
 - Database: MariaDB
 - Deployment: Docker Compose + Caddy
@@ -25,3 +26,5 @@
 
 ## Description
 MuchoCore keeps shared server/domain logic in one application and handles Geometry Dash client differences at a compatibility boundary. It is designed for GDPS owners who want a maintainable core, reproducible deployment and extensions that do not require forking the tracked core source.
+
+- Community: https://discord.gg/8yRyH2Tngp
