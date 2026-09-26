@@ -2,61 +2,168 @@
 
 MuchoCore includes a guided database migration flow so moving an existing GDPS does not require manually rewriting SQL.
 
-## Supported source family
+## What the wizard does
 
-The first automatic importer targets the Cvolton database schema. GDPS-Maker is detected as **Cvolton / GDPS-Maker compatible** when its database exposes the same schema. Detection is schema-based rather than dependent on a project name.
+The Migration Center follows this order:
 
-Required source tables:
+1. connect to the old database;
+2. read the old schema in read-only mode;
+3. identify the database family from its tables;
+4. show exactly where each kind of data lives;
+5. show a preview of the data currently imported automatically;
+6. wait for an explicit MIGRATE confirmation before writing to MuchoCore.
 
-- `accounts`
-- `users`
-- `levels`
+The default mode is a dry-run. A dry-run does not write the destination database.
 
-Optional tables:
-
-- `levelscores`
-- `platscores`
-
-## Using the wizard
+## What to enter
 
 From the MuchoCore VPS:
 
-```bash
+~~~text
 sudo mucho
-```
-
-Open:
-
-```text
-Database & migrations
+→ Database & migrations
 → Migration Center
-```
+~~~
 
-The wizard asks for the old database connection, detects the schema, and shows a preview before importing anything.
+The wizard asks for five source database values.
 
-The default path is always a dry-run. To apply the import, the interactive wizard requires typing:
+| Field | What it means | Where to find it |
+|---|---|---|
+| Old DB host | MySQL/MariaDB server address of the old GDPS | Old hosting/database panel. Do not enter the GDPS website URL. |
+| Old DB port | MySQL/MariaDB TCP port | Usually 3306; use the old host's value when different. |
+| Old DB name | Exact database name used by the old GDPS | phpMyAdmin/database panel or the old server configuration. |
+| Old DB user | MySQL/MariaDB login for the old database | phpMyAdmin/database panel or the old server configuration. |
+| Old DB password | Password for that database user | The password belonging to that MySQL/MariaDB user. |
 
-```text
-MIGRATE
-```
+Examples:
 
-The source connection is opened with a read-only transaction. MuchoCore records source-to-target account and level mappings, so repeated runs can resume/reconcile previously imported rows rather than blindly creating duplicates.
+~~~text
+Old DB host: 127.0.0.1
+Old DB port: 3306
+Old DB name: gdps
+Old DB user: gdps_user
+Old DB password: ********
+~~~
+
+Important: the website address and database address are different things. For example, https://example.com is not a MySQL host.
+
+## Where the old GDPS data is stored
+
+The current MegaSa1nt/Cvolton-compatible schema exposes these data areas:
+
+| Data | Source table(s) | Current status |
+|---|---|---|
+| Accounts | accounts | Imported automatically |
+| Player profiles/progress | users | Imported automatically |
+| Levels | levels | Imported automatically |
+| Classic scores | levelscores | Imported automatically |
+| Platformer scores | platscores | Imported automatically |
+| Level/account comments | comments, acccomments | Detected and reported; dedicated mapping still required |
+| Friends/requests/blocks/messages | friendships, friendreqs, blocks, messages, links | Detected and reported; dedicated mapping still required |
+| Lists/Map Packs/Gauntlets/Daily | lists, mappacks, gauntlets, dailyfeatures | Detected and reported; dedicated mapping still required |
+| Legacy moderation/admin | roles, roleassign, modips, bannedips, reports, modactions, actions, suggest, modipperms | Detected and reported; not copied into MuchoCore RBAC |
+| Song metadata | songs | Detected; binary files need filesystem access |
+| Music/SFX files | old server music/ and sfx/ directories | Requires a separate file copy |
+
+This is intentional: Migration Center never reports data as imported when it has only detected it.
+
+## MegaSa1nt / FHGDPS-style sources
+
+MegaSa1nt's public GMDprivateServer is a fork of Cvolton/GMDprivateServer and uses a Cvolton-compatible database layout. The detector therefore identifies the schema family from tables instead of trusting a product name.
+
+A large matching set of tables can be shown as:
+
+~~~text
+Family: Cvolton-compatible GDPS schema
+Extended signature: MegaSa1nt-style / FHGDPS-compatible Cvolton schema
+~~~
+
+The detector does not claim that every database with this schema came from FHGDPS. It only reports the schema compatibility.
+
+## What READY, DETECTED and FILES mean
+
+~~~text
+READY
+  MuchoCore currently has an automatic database importer for this dataset.
+
+DETECTED
+  The old database contains this dataset, but there is no safe automatic
+  mapping into the current MuchoCore model yet. Nothing is silently discarded.
+
+FILES
+  Database metadata can be inspected, but the real data also exists as files
+  on the old server. Database credentials alone are not enough to copy those files.
+~~~
+
+## Apply flow
+
+The safe operating sequence is:
+
+~~~text
+1. Keep the old GDPS database untouched.
+2. Run Migration Center in DRY RUN mode.
+3. Read the WHAT IS WHERE section.
+4. Check the account/level/score counts.
+5. Make a MuchoCore database backup.
+6. Run the wizard with --apply.
+7. Confirm by typing MIGRATE.
+8. Verify the new instance with Mucho Doctor and /health.
+~~~
+
+The source database connection is opened with:
+
+~~~sql
+SET SESSION TRANSACTION READ ONLY
+~~~
+
+Repeated imports use source-to-target account and level mappings so an already imported source record can be reconciled instead of blindly duplicated.
 
 ## Password handling
 
 Passwords are not assumed to be portable between unrelated hashing schemes. When a source password is not already a password hash that MuchoCore can verify safely, the imported account receives a random unusable password hash and is marked for a password reset workflow.
 
-The source `gjp2` value is only retained as a hash when it matches the expected legacy format.
+The source gjp2 value is retained only as a hash when it matches the expected legacy format.
 
-## Safety model
+## Unknown sources
 
-Before a production migration:
+Unknown schemas are rejected:
 
-1. make a MuchoCore database backup;
-2. run the dry-run preview;
-3. inspect account/level/score counts;
-4. apply the migration;
-5. run `sudo mucho` → **Mucho Doctor** and verify the public `/health` endpoint;
-6. keep the old GDPS database untouched until the new instance is verified.
+~~~text
+UNSUPPORTED SOURCE SCHEMA
+Nothing was changed in MuchoCore.
+~~~
 
-Unknown schemas are reported and rejected rather than guessed.
+The wizard also prints the tables it actually found. This makes it possible to see exactly what differs from the supported family instead of guessing.
+
+## CLI usage
+
+Interactive:
+
+~~~bash
+php bin/mucho-migrate.php
+~~~
+
+Dry-run with explicit values:
+
+~~~bash
+php bin/mucho-migrate.php \
+  --source-host=127.0.0.1 \
+  --source-port=3306 \
+  --source-db=gdps \
+  --source-user=gdps_user
+~~~
+
+Apply:
+
+~~~bash
+MUCHO_MIGRATION_SOURCE_PASS='your-db-password' \
+php bin/mucho-migrate.php \
+  --source-host=127.0.0.1 \
+  --source-port=3306 \
+  --source-db=gdps \
+  --source-user=gdps_user \
+  --apply \
+  --confirm=MIGRATE
+~~~
+
+Avoid putting database passwords directly into shell history when possible. The interactive wizard can request the password without echoing it.
