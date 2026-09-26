@@ -15,11 +15,13 @@
 <meta property="og:title" content="MuchoCore — Geometry Dash Private Server Core">
 <meta property="og:description" content="A modern, version-aware Geometry Dash Private Server foundation for GDPS owners.">
 <meta property="og:url" content="https://muchogdps.space/muchocore/">
+<meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://muchogdps.space/assets/muchocore-logo.jpg">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MuchoCore — Geometry Dash Private Server Core">
-<meta name="twitter:description" content="One backend for legacy and modern Geometry Dash clients, with deployment, migrations, plugins, security and administration built in.">
+<meta name="twitter:description" content="A maintainable GDPS foundation with compatibility, deployment, migrations, plugins, security and administration built in.">
+<meta name="twitter:image" content="https://muchogdps.space/assets/muchocore-logo.jpg">
 
 <title>MuchoCore — Geometry Dash Private Server Core</title>
 
@@ -250,6 +252,58 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
   .fact{grid-template-columns:95px 1fr}
   h1{font-size:49px}
 }
+
+
+.skip-link{
+  position:fixed;left:14px;top:12px;z-index:300;
+  padding:10px 13px;border-radius:10px;background:#fff;color:#090c12;
+  font-size:11px;font-weight:900;transform:translateY(-160%);
+}
+.skip-link:focus{transform:none}
+#reading-progress{
+  position:fixed;left:0;top:0;z-index:250;width:100%;height:2px;
+  transform-origin:left;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.navlinks a[aria-current="true"]{background:#111824;color:#fff}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #222d3c;border-radius:999px;
+  background:rgba(14,20,29,.72);color:#9eabbe;font-size:9px;font-weight:820
+}
+.hero-badge strong{color:#dde5ef}
+.install-box{
+  margin-top:17px;padding:13px;border:1px solid #202b3a;border-radius:13px;background:#0a1017
+}
+.install-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.install-head span{color:#748196;font-size:8.5px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.install-command{
+  overflow:auto;color:#dce3ee;font:10px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  white-space:pre-wrap;word-break:break-word
+}
+.install-command .prompt{color:#6f7d92}
+.copy-btn{
+  flex:0 0 auto;min-height:28px;padding:0 8px;border:1px solid #2a3547;border-radius:8px;
+  background:#121a25;color:#cbd4e1;cursor:pointer;font-size:8.5px;font-weight:850
+}
+.copy-btn:hover{background:#17212f}
+.copy-ok{margin-left:6px;color:#7fe7b8;font-size:8px;font-weight:850;opacity:0;transition:opacity .15s}
+.copy-ok.show{opacity:1}
+.trust-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px
+}
+.trust-item{
+  display:flex;align-items:center;gap:9px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;
+  background:rgba(13,19,28,.72)
+}
+.trust-dot{width:7px;height:7px;flex:0 0 auto;border-radius:50%;background:var(--good);box-shadow:0 0 12px rgba(85,223,170,.65)}
+.trust-item strong{display:block;font-size:9.5px}
+.trust-item span{display:block;margin-top:2px;color:var(--muted2);font-size:8px}
+:focus-visible{outline:2px solid #a69dff;outline-offset:3px}
+@media(max-width:760px){.trust-strip{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.trust-strip{grid-template-columns:1fr}.install-command{font-size:9px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.card{transition:none!important}}
+
 </style>
 
 <script type="application/ld+json">
@@ -260,8 +314,9 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
   "alternateName":"MuchoCore GDPS Core",
   "applicationCategory":"DeveloperApplication",
   "operatingSystem":"Linux",
-  "softwareVersion":"1.0.3",
+  "softwareVersion":"1.0.4",
   "license":"https://opensource.org/license/mit/",
+  "dateModified":"2026-09-27",
   "url":"https://muchogdps.space/muchocore/",
   "downloadUrl":"https://github.com/IZKGMD/GMDmucho-core/releases",
   "codeRepository":"https://github.com/IZKGMD/GMDmucho-core",
@@ -305,6 +360,8 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
 </head>
 
 <body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div id="reading-progress" aria-hidden="true"></div>
 <header class="top">
   <div class="container navbar">
     <a class="brand" href="/muchocore/" aria-label="MuchoCore home">
@@ -324,7 +381,7 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
   </div>
 </header>
 
-<main>
+<main id="main-content">
   <section class="hero">
     <div class="container hero-grid">
       <div>
@@ -336,16 +393,31 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
           instead of making every GDPS owner assemble those pieces separately.
         </p>
         <div class="hero-actions">
-          <a class="btn" href="https://github.com/IZKGMD/GMDmucho-core/releases" target="_blank" rel="noopener noreferrer">Get MuchoCore</a>
-          <a class="btn alt" href="https://github.com/IZKGMD/GMDmucho-core/tree/main/docs" target="_blank" rel="noopener noreferrer">Read documentation ↗</a>
-          <a class="btn alt" href="#migration">Plan a migration</a>
+          <a class="btn" href="https://github.com/IZKGMD/GMDmucho-core/releases/tag/v1.0.4" target="_blank" rel="noopener noreferrer">Download v1.0.4 ↗</a>
+          <a class="btn alt" href="https://github.com/IZKGMD/GMDmucho-core/blob/main/docs/SETUP.md" target="_blank" rel="noopener noreferrer">Read the setup guide</a>
+          <a class="btn alt" href="https://discord.gg/8yRyH2Tngp" target="_blank" rel="noopener noreferrer">Join Discord</a>
+        </div>
+        <div class="hero-badges" aria-label="Project highlights">
+          <span class="hero-badge"><strong>v1.0.4</strong> stable</span>
+          <span class="hero-badge"><strong>1.0 → 2.2</strong> runtime profiles</span>
+          <span class="hero-badge"><strong>Docker</strong> ready</span>
+          <span class="hero-badge"><strong>CI</strong> validated</span>
+        </div>
+        <div class="install-box">
+          <div class="install-head">
+            <span>Start on a VPS</span>
+            <button class="copy-btn" type="button" data-copy="git clone https://github.com/IZKGMD/GMDmucho-core.git\ncd GMDmucho-core\nsudo ./install" aria-label="Copy installation commands">Copy <span class="copy-ok" aria-live="polite">Copied</span></button>
+          </div>
+          <div class="install-command"><span class="prompt">$ </span>git clone https://github.com/IZKGMD/GMDmucho-core.git
+<span class="prompt">$ </span>cd GMDmucho-core
+<span class="prompt">$ </span><strong>sudo ./install</strong></div>
         </div>
       </div>
 
       <aside class="hero-card" aria-label="MuchoCore quick facts">
         <h2>MuchoCore at a glance</h2>
         <div class="fact-list">
-          <div class="fact"><span>Current line</span><strong>v1.0.3 stable release</strong></div>
+          <div class="fact"><span>Current line</span><strong>v1.0.4 stable release</strong></div>
           <div class="fact"><span>Client families</span><strong>GD 1.0, 1.1, 1.5, 1.9, 2.0, 2.1 and 2.2</strong></div>
           <div class="fact"><span>Backend</span><strong>PHP 8.3 + MariaDB</strong></div>
           <div class="fact"><span>Deployment</span><strong>Docker Compose + Caddy</strong></div>
@@ -360,12 +432,19 @@ details p{margin:0 2px 16px;color:var(--muted);font-size:10.5px;line-height:1.65
 
   <section class="section">
     <div class="container">
+      <div class="trust-strip" aria-label="Why the project is easy to evaluate">
+        <div class="trust-item"><span class="trust-dot"></span><div><strong>Open source</strong><span>Public repository & MIT license</span></div></div>
+        <div class="trust-item"><span class="trust-dot"></span><div><strong>Version aware</strong><span>Protocol differences stay explicit</span></div></div>
+        <div class="trust-item"><span class="trust-dot"></span><div><strong>Operator focused</strong><span>Backups, updates & diagnostics</span></div></div>
+        <div class="trust-item"><span class="trust-dot"></span><div><strong>AI-readable</strong><span>Canonical docs, sitemap & llms.txt</span></div></div>
+      </div>
       <div class="metrics" aria-label="Core facts">
         <div class="metric"><b>1.0–2.2</b><span>Documented client generation profiles</span></div>
         <div class="metric"><b>1 core</b><span>Shared domain logic across versions</span></div>
         <div class="metric"><b>PHP 8.3</b><span>Current application runtime</span></div>
         <div class="metric"><b>MIT</b><span>Open-source license</span></div>
       </div>
+      <p class="note" style="margin:12px 2px 0">v1.0.4 is the current published stable release. Product discovery is host-isolated so a GDPS using MuchoCore does not automatically expose the MuchoCore marketing surface on its own domain.</p>
     </div>
   </section>
 
@@ -619,19 +698,68 @@ PluginContext
 
 <footer class="footer">
   <div class="container">
-    MuchoCore — Geometry Dash Private Server Core · MIT License ·
-    <a href="https://github.com/IZKGMD/GMDmucho-core" target="_blank" rel="noopener noreferrer">GitHub</a>
+    MuchoCore — Geometry Dash Private Server Core · v1.0.4 · MIT License ·
+    <a href="https://github.com/IZKGMD/GMDmucho-core" target="_blank" rel="noopener noreferrer">GitHub</a> ·
+    <a href="https://github.com/IZKGMD/GMDmucho-core/releases/tag/v1.0.4" target="_blank" rel="noopener noreferrer">v1.0.4</a> ·
+    <a href="https://discord.gg/8yRyH2Tngp" target="_blank" rel="noopener noreferrer">Discord</a>
   </div>
 </footer>
 
 <script>
 const menu=document.getElementById('menu');
 const nav=document.getElementById('navLinks');
-menu.addEventListener('click',()=>{
-  const open=nav.classList.toggle('open');
-  menu.setAttribute('aria-expanded',String(open));
+if(menu&&nav){
+  menu.addEventListener('click',()=>{
+    const open=nav.classList.toggle('open');
+    menu.setAttribute('aria-expanded',String(open));
+  });
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
+}
+
+const progress=document.getElementById('reading-progress');
+const updateProgress=()=>{
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  if(progress) progress.style.transform=max>0?'scaleX('+Math.min(1,window.scrollY/max)+')':'scaleX(1)';
+};
+window.addEventListener('scroll',updateProgress,{passive:true});
+window.addEventListener('resize',updateProgress);
+updateProgress();
+
+document.querySelectorAll('[data-copy]').forEach(button=>{
+  button.addEventListener('click',async()=>{
+    const value=button.getAttribute('data-copy')||'';
+    let ok=false;
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        await navigator.clipboard.writeText(value);
+        ok=true;
+      }else{
+        const area=document.createElement('textarea');
+        area.value=value; area.setAttribute('readonly','');
+        area.style.position='fixed'; area.style.opacity='0';
+        document.body.appendChild(area); area.select();
+        ok=document.execCommand('copy'); area.remove();
+      }
+    }catch(_){ ok=false; }
+    const state=button.querySelector('.copy-ok');
+    if(state){
+      state.textContent=ok?'Copied':'Copy failed';
+      state.classList.add('show');
+      window.setTimeout(()=>state.classList.remove('show'),1300);
+    }
+  });
 });
-nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
+
+const sections=[...document.querySelectorAll('main section[id]')];
+const sectionLinks=[...document.querySelectorAll('.navlinks a[href^="#"]')];
+const markActive=()=>{
+  const y=window.scrollY+140;
+  let active='';
+  for(const section of sections) if(section.offsetTop<=y) active=section.id;
+  sectionLinks.forEach(link=>link.setAttribute('aria-current',link.getAttribute('href')==='#'+active?'true':'false'));
+};
+window.addEventListener('scroll',markActive,{passive:true});
+markActive();
 </script>
 </body>
 </html>
