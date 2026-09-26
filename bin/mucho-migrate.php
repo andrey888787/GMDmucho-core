@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use MuchoCore\\Database\\Database;
-use MuchoCore\\Database\\Migrator;
-use MuchoCore\\Migration\\CvoltonDatabaseImporter;
-use MuchoCore\\Migration\\SourceDetector;
+use MuchoCore\Database\Database;
+use MuchoCore\Database\Migrator;
+use MuchoCore\Migration\CvoltonDatabaseImporter;
+use MuchoCore\Migration\SourceDetector;
 use PDO;
 use RuntimeException;
 use Throwable;
