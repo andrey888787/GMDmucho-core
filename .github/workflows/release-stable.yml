@@ -115,6 +115,34 @@ jobs:
             ':(exclude)assets/brand/sources/**' \
             ':(exclude).release/**'
           test -s "MuchoCore-${TAG}.zip"
+          if [[ "${{ steps.marker.outputs.archive_only }}" == "true" ]]; then
+            for path in \
+              README.md \
+              CHANGELOG.md \
+              START_HERE.md \
+              .gitattributes \
+              public/muchocore/index.html \
+              public/llms.txt \
+              public/sitemap.xml \
+              docs/GETTING_STARTED.md \
+              docs/MIGRATION_KIT.md \
+              docs/CVOLTON_MIGRATION.md \
+              tools/migration/mucho-migrate.sh \
+              tests/release/migration-kit.sh; do
+              mkdir -p "archive-work/MuchoCore-${TAG}/$(dirname "$path")"
+              cp -p "$path" "archive-work/MuchoCore-${TAG}/$path"
+            done
+          fi
+
+          if [[ "${{ steps.marker.outputs.archive_only }}" == "true" ]]; then
+            awk -v tag="$TAG" '
+              $0 ~ "^## " tag " (|$)" {printing=1; print; next}
+              printing && $0 ~ "^## " {exit}
+              printing {print}
+            ' CHANGELOG.md > RELEASE_NOTES.md
+            gh release edit "$TAG" --title "MuchoCore $TAG" --notes-file RELEASE_NOTES.md --latest
+            rm -f RELEASE_NOTES.md
+          fi
 
       - name: Upload source archive
         if: steps.marker.outputs.ready == 'true' || steps.marker.outputs.archive_only == 'true'
