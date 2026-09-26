@@ -55,15 +55,29 @@
 | 🏰 **Clans** | Player-dashboard clan directory, clan names/tags, owner/officer/member roles, membership, invitations and server-side in-game clan-tag display |
 | 🧰 **Client patchers** | Windows desktop patcher, browser-based Windows patcher and Android APK patcher |
 | 🐳 **Deployment** | Docker Compose, MariaDB, PHP 8.3, Caddy, automatic migrations, one-command manual updates and release detection |
-| 🧪 **Validation** | PHP, shell, protocol, wire-format, security, patcher, Docker and Caddy checks in GitHub Actions |
+| 🔄 **Operator onboarding** | Getting Started guide plus a Migration Kit with read-only preflight, verified target backup, transactional import, healthcheck and migration reports |
+| 🧪 **Validation** | PHP, shell, protocol, wire-format, security, patcher, Docker, Caddy and migration-tool checks in GitHub Actions |
 
 ---
 
 ## 🚀 Quick start
 
-New to MuchoCore? Start with **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the shortest install path.
+### New installation
 
-Already running a Cvolton/GMDprivateServer-style GDPS? Start with the **[Migration Kit](docs/MIGRATION_KIT.md)**. It runs a read-only preflight first, creates a verified target backup before apply, uses the existing transactional importer, and performs a post-migration healthcheck.
+Start with **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the shortest path from a fresh VPS to a working GDPS.
+
+```bash
+git clone https://github.com/IZKGMD/GMDmucho-core.git
+cd GMDmucho-core
+sudo ./install
+```
+
+### Existing GDPS migration
+
+Already running a Cvolton/GMDprivateServer-style GDPS? Start with **[docs/MIGRATION_KIT.md](docs/MIGRATION_KIT.md)**.
+
+The default migration command is a **dry-run**. It checks the target, inspects the source database, reports row counts and changes nothing until you explicitly use `--apply --confirm=COVOLTON`.
+
 
 MuchoCore is designed so you do not have to assemble PHP, MariaDB and Caddy manually.
 
@@ -500,7 +514,7 @@ src/                       server logic
 public/                    HTTP entry points, GD endpoints and Admin Panel
 database/                  database migrations
 tests/                     automated validation and compatibility fixtures
-tools/                     client patchers and development utilities
+tools/                     client patchers, migration tools and development utilities
 docs/                      setup, compatibility and deployment documentation
 docker/                    Dockerfile and Caddy configuration
 patched/apk/               patched Android builds
@@ -540,7 +554,8 @@ Before large changes, back up the database and verify that your Cloud Save secre
 | Document | Purpose |
 | --- | --- |
 | [Getting Started](docs/GETTING_STARTED.md) | Shortest path from VPS to a working GDPS |
-| [Migration Kit](docs/MIGRATION_KIT.md) | Safe Cvolton/fhGDPS-style migration workflow |
+| [Migration Kit](docs/MIGRATION_KIT.md) | Safe Cvolton/GMDprivateServer-style migration workflow |
+| [Cvolton Migration](docs/CVOLTON_MIGRATION.md) | Low-level source schema and field mapping details |
 | [Setup](docs/SETUP.md) | VPS installation, updates and backups |
 | [Client Setup](docs/CLIENT_SETUP.md) | Windows, Android and client patching |
 | [Version Profiles](docs/VERSIONS.md) | Geometry Dash generation handling |
