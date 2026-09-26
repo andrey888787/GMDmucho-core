@@ -20,6 +20,22 @@
         respond 404
     }
 
+    # Serve the MuchoCore product page explicitly. Do not rely on the
+    # application/PHP fallback for this static discovery surface.
+    @muchocore_root host {$MUCHOCORE_SITE_HOST}
+    handle @muchocore_root {
+        redir /muchocore /muchocore/ 308
+    }
+
+    @muchocore_page {
+        host {$MUCHOCORE_SITE_HOST}
+        path /muchocore/*
+    }
+    handle @muchocore_page {
+        root * /var/www/mucho-core/public/muchocore
+        file_server
+    }
+
     # Reject oversized HTTP bodies before PHP is invoked. PHP itself remains
     # capped at 70M post_max_size / 64M upload_max_filesize.
     request_body {
