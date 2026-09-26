@@ -81,6 +81,9 @@ show_status() {
     echo "----------------"
     echo "Version: $(tr -d '[:space:]' < "$ROOT/VERSION" 2>/dev/null || echo unknown)"
     echo "Domain:  $(env_get DOMAIN)"
+    local php_version
+    php_version="$(compose exec -T app php -r 'echo PHP_VERSION;' 2>/dev/null || echo unknown)"
+    echo "PHP:     $php_version"
     echo
     compose ps
 }
