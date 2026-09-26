@@ -68,7 +68,7 @@ $options = getopt("", [
 if (isset($options["help"])) {
     echo "MuchoCore Migration Center".PHP_EOL.PHP_EOL;
     echo "Interactive: php bin/mucho-migrate.php".PHP_EOL;
-    echo "Dry-run is the default; apply requires MIGRATE confirmation.".PHP_EOL;
+    echo "Dry-run is the default; apply requires --confirm=MIGRATE or interactive MIGRATE confirmation.".PHP_EOL;
     exit(0);
 }
 
