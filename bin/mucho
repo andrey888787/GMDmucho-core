@@ -255,11 +255,12 @@ main_menu() {
         echo
         echo "1) Server status"
         echo "2) Configuration"
-        echo "3) Update MuchoCore"
-        echo "4) Database backup"
-        echo "5) Restart services"
-        echo "6) Show logs"
-        echo "7) Mucho Doctor"
+        echo "3) Database & migrations"
+        echo "4) Update MuchoCore"
+        echo "5) Database backup"
+        echo "6) Restart services"
+        echo "7) Show logs"
+        echo "8) Mucho Doctor"
         echo "0) Exit"
         echo
 
@@ -268,14 +269,49 @@ main_menu() {
         case "$choice" in
             1) show_status; read -r -p "Press Enter..." _ ;;
             2) configuration_menu ;;
-            3) "$ROOT/update.sh"; read -r -p "Press Enter..." _ ;;
-            4) "$ROOT/bin/mucho-db-backup.sh"; read -r -p "Press Enter..." _ ;;
-            5) restart_services; echo "Services restarted."; read -r -p "Press Enter..." _ ;;
-            6) cd "$ROOT"; compose logs --tail=120; read -r -p "Press Enter..." _ ;;
-            7) doctor || true; read -r -p "Press Enter..." _ ;;
+            3) database_menu ;;
+            4) "$ROOT/update.sh"; read -r -p "Press Enter..." _ ;;
+            5) "$ROOT/bin/mucho-db-backup.sh"; read -r -p "Press Enter..." _ ;;
+            6) restart_services; echo "Services restarted."; read -r -p "Press Enter..." _ ;;
+            7) cd "$ROOT"; compose logs --tail=120; read -r -p "Press Enter..." _ ;;
+            8) doctor || true; read -r -p "Press Enter..." _ ;;
             0) exit 0 ;;
             *) echo "Invalid selection."; sleep 1 ;;
         esac
+    done
+}
+
+database_menu() {
+    while true; do
+        clear
+        echo "MuchoCore Database & Migrations"
+        echo "-------------------------------"
+        echo
+        compose exec -T app php bin/migrate.php status || true
+        echo
+        echo "1) Apply pending migrations"
+        echo "2) Show Cvolton import command"
+        echo "0) Back"
+        echo
+        local choice
+        read -r -p "Select: " choice
+        case "$choice" in
+            1)
+                compose exec -T app php bin/migrate.php migrate
+                ;;
+            2)
+                echo
+                echo "Cvolton import is dry-run by default."
+                echo "Use bin/import-cvolton-db.php with --confirm=COVOLTON only when ready to apply."
+                echo
+                echo "Example:"
+                echo "  docker compose exec -T app php bin/import-cvolton-db.php \\"
+                echo "    --source-host=HOST --source-db=DATABASE --source-user=USER"
+                ;;
+            0) return ;;
+            *) echo "Invalid selection." ;;
+        esac
+        read -r -p "Press Enter..." _
     done
 }
 
