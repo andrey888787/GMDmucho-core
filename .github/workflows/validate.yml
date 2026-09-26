@@ -136,7 +136,6 @@ jobs:
           MUCHO_BACKUP_DIR=/var/lib/muchocore-backups
           TZ=UTC
           MUCHO_TUNNEL_TOKEN=dummy-token
-          CADDY_EXTRA_HOSTS=testgdps.muchogdps.space
           EOF
           docker compose --env-file .ci.env config -q
           docker compose --env-file .ci.env -f docker-compose.yml -f docker-compose.tunnel.yml config -q
@@ -218,7 +217,7 @@ jobs:
           grep -Fq 'rewrite * /api/api/accounts/lostusername.php' docker/Caddyfile
           grep -Fq 'path /.env* /.git/* /composer.json /composer.lock /config/* /src/* /tests/* /storage/*' docker/Caddyfile
           grep -Fq 'auto_https disable_redirects' docker/Caddyfile
-          grep -Fq 'testgdps.muchogdps.space' docker/Caddyfile
+          ! grep -Fq 'testgdps.muchogdps.space' docker/Caddyfile
           grep -Fq 'testgdps-app:9000' docker/Caddyfile
           grep -Fq 'testgdps-db' docker-compose.yml
           grep -Fq 'testgdps-app' docker-compose.yml
