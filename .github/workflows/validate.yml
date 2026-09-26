@@ -125,9 +125,9 @@ jobs:
       - name: Check lean source archive contents
         run: |
           set -euo pipefail
-          archive="$(mktemp --suffix=.zip)"
+          archive="archive-check.zip"
           trap 'rm -f "$archive"' EXIT
-          git archive --format=zip HEAD -- . -o "$archive"
+          git archive --format=zip -o "$archive" HEAD -- .
           if unzip -Z1 "$archive" | grep -Fxq 'Geometry.Dash.ver.1.40.build.11.apk'; then
             echo "Large APK test fixture must not be exported into lean source archives." >&2
             exit 1
