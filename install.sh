@@ -7,7 +7,7 @@ DOMAIN="${MUCHO_DOMAIN:-}"
 DB_NAME="${MUCHO_DB_NAME:-}"
 DB_USER="${MUCHO_DB_USER:-}"
 ADMIN_USER="${MUCHO_ADMIN_USER:-}"
-CADDY_EXTRA_HOSTS="${MUCHO_CADDY_EXTRA_HOSTS:-testgdps.muchogdps.space}"
+CADDY_EXTRA_HOSTS="${MUCHO_CADDY_EXTRA_HOSTS:-}"
 CUSTOM_CONTENT_URL="${MUCHO_CUSTOM_CONTENT_URL:-}"
 TURNSTILE_SITEKEY="${MUCHO_TURNSTILE_SITEKEY:-}"
 TURNSTILE_SECRET="${MUCHO_TURNSTILE_SECRET:-}"
@@ -293,7 +293,7 @@ fi
 
 install -d -m 700 "$INSTALL_DIR/.secrets"
 
-# Generate isolated credentials for the first hosted test tenant.
+# Generate isolated credentials for the local integration-test tenant.
 if [[ ! -s "$INSTALL_DIR/.secrets/testgdps_db_password" ]]; then
   openssl rand -hex 24 > "$INSTALL_DIR/.secrets/testgdps_db_password"
 fi
