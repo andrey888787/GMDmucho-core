@@ -234,12 +234,14 @@ jobs:
           docker run --rm \
             -e DOMAIN=gdps.example.com \
             -e CADDY_ADDRESS='http://gdps.example.com http://www.gdps.example.com https://gdps.example.com https://www.gdps.example.com' \
+            -e MUCHOCORE_SITE_HOST='disabled.invalid' \
             -v "$PWD/docker/Caddyfile:/etc/caddy/Caddyfile:ro" \
             caddy:2.10-alpine \
             caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
           docker run --rm \
             -e DOMAIN=gdps.example.com \
             -e CADDY_ADDRESS='http://gdps.example.com http://www.gdps.example.com https://gdps.example.com https://www.gdps.example.com' \
+            -e MUCHOCORE_SITE_HOST='disabled.invalid' \
             -v "$PWD/docker/Caddyfile:/etc/caddy/Caddyfile:ro" \
             caddy:2.10-alpine \
             caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile \
