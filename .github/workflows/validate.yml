@@ -26,7 +26,9 @@ jobs:
           bash -n docker/app-entrypoint.sh
           ! grep -nE '\\\$[0-9]+' install.sh
           bash -n uninstall.sh
+          bash -n tools/migration/mucho-migrate.sh
           find tests -name '*.sh' -print0 | xargs -0 -n1 bash -n
+          bash tests/release/migration-kit.sh
 
       - name: Validate Composer manifest
         run: composer validate --strict --no-check-publish
@@ -109,6 +111,11 @@ jobs:
           test -f bin/mucho-install-auto-update.sh
           test -f docs/AUTO_UPDATE.md
           test -f docs/ADMIN_RBAC.md
+          test -f docs/GETTING_STARTED.md
+          test -f docs/MIGRATION_KIT.md
+          test -f tools/migration/mucho-migrate.sh
+          test -x tools/migration/mucho-migrate.sh
+          test -f tests/release/migration-kit.sh
           test -f database/migrations/20260926_001_plugin_admin.php
           test -f public/admin/pages/plugins.php
           test -f database/migrations/20260926_002_clans_v2.php
