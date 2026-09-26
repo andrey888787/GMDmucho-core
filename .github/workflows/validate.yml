@@ -116,10 +116,26 @@ jobs:
           test -f tools/migration/mucho-migrate.sh
           test -x tools/migration/mucho-migrate.sh
           test -f tests/release/migration-kit.sh
+          test -f .gitattributes
+          git check-attr export-ignore -- Geometry.Dash.ver.1.40.build.11.apk | grep -Fq ': set'
           test -f database/migrations/20260926_001_plugin_admin.php
           test -f public/admin/pages/plugins.php
           test -f database/migrations/20260926_002_clans_v2.php
 
+      - name: Check lean source archive contents
+        run: |
+          set -euo pipefail
+          archive="$(mktemp --suffix=.zip)"
+          trap 'rm -f "$archive"' EXIT
+          git archive --format=zip HEAD -- . -o "$archive"
+          if unzip -Z1 "$archive" | grep -Fxq 'Geometry.Dash.ver.1.40.build.11.apk'; then
+            echo "Large APK test fixture must not be exported into lean source archives." >&2
+            exit 1
+          fi
+          if unzip -Z1 "$archive" | grep -Eq '^(.*/)?\.release/'; then
+            echo "Release markers must not be exported." >&2
+            exit 1
+          fi
       - name: Check Docker Compose configuration
         run: |
           trap 'rm -rf .secrets .ci.env' EXIT
